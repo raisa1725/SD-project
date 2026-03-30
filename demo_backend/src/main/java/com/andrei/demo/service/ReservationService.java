@@ -7,6 +7,7 @@ import com.andrei.demo.model.PersonRole;
 import com.andrei.demo.model.Reservation;
 import com.andrei.demo.model.ReservationCreateDTO;
 import com.andrei.demo.model.ReservationStatus;
+import com.andrei.demo.model.ReservationUpdateDTO;
 import com.andrei.demo.repository.EventRepository;
 import com.andrei.demo.repository.PersonRepository;
 import com.andrei.demo.repository.ReservationRepository;
@@ -66,7 +67,7 @@ public class ReservationService {
         }
 
         if (reservationDTO.getSpotsReserved() > remainingSpots) {
-            throw new ValidationException("Not enough available spots for this event");
+            throw new ValidationException("Not enough available spots. Only " + remainingSpots + " spots left");
         }
 
         Reservation reservation = new Reservation();
@@ -111,41 +112,38 @@ public class ReservationService {
         return reservationRepository.save(existingReservation);
     }
 
-    public Reservation updateReservation2(UUID uuid, Reservation reservation) {
-        return reservationRepository.findById(uuid)
-                .map(existingReservation -> {
-                    if (reservation.getStatus() != null) {
-                        existingReservation.setStatus(reservation.getStatus());
-                    }
+    public Reservation patchReservation(UUID uuid, ReservationUpdateDTO dto) {
+        Reservation existingReservation = reservationRepository.findById(uuid)
+                .orElseThrow(() -> new ValidationException("Reservation with id " + uuid + " not found"));
 
-                    if (reservation.getSpotsReserved() != null && reservation.getSpotsReserved() > 0) {
-                        int alreadyReservedSpots = reservationRepository.findByEventId(existingReservation.getEvent().getId())
-                                .stream()
-                                .filter(r -> !r.getId().equals(existingReservation.getId()))
-                                .filter(r -> r.getStatus() != ReservationStatus.DECLINED)
-                                .mapToInt(Reservation::getSpotsReserved)
-                                .sum();
+        if (dto.getStatus() != null) {
+            existingReservation.setStatus(dto.getStatus());
+        }
 
-                        int remainingSpots = existingReservation.getEvent().getMaxParticipants() - alreadyReservedSpots;
+        if (dto.getSpotsReserved() != null && dto.getSpotsReserved() > 0) {
+            int alreadyReservedSpots = reservationRepository.findByEventId(existingReservation.getEvent().getId())
+                    .stream()
+                    .filter(r -> !r.getId().equals(existingReservation.getId()))
+                    .filter(r -> r.getStatus() != ReservationStatus.DECLINED)
+                    .mapToInt(Reservation::getSpotsReserved)
+                    .sum();
 
-                        if (reservation.getSpotsReserved() > remainingSpots) {
-                            throw new ValidationException("Not enough available spots for this event");
-                        }
+            int remainingSpots = existingReservation.getEvent().getMaxParticipants() - alreadyReservedSpots;
 
-                        existingReservation.setSpotsReserved(reservation.getSpotsReserved());
-                    }
+            if (dto.getSpotsReserved() > remainingSpots) {
+                throw new ValidationException("Not enough available spots. Only " + remainingSpots + " spots left");
+            }
 
-                    return reservationRepository.save(existingReservation);
-                })
-                .orElseThrow(() ->
-                        new ValidationException("Reservation with id " + uuid + " not found"));
+            existingReservation.setSpotsReserved(dto.getSpotsReserved());
+        }
+
+        return reservationRepository.save(existingReservation);
     }
 
     public void deleteReservation(UUID uuid) {
         if (!reservationRepository.existsById(uuid)) {
             throw new ValidationException("Reservation with id " + uuid + " not found");
         }
-
         reservationRepository.deleteById(uuid);
     }
 

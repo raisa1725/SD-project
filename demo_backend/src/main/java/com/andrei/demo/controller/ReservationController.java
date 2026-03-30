@@ -3,6 +3,7 @@ package com.andrei.demo.controller;
 import com.andrei.demo.config.ValidationException;
 import com.andrei.demo.model.Reservation;
 import com.andrei.demo.model.ReservationCreateDTO;
+import com.andrei.demo.model.ReservationUpdateDTO;
 import com.andrei.demo.service.ReservationService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -28,9 +29,7 @@ public class ReservationController {
     }
 
     @PostMapping("/reservation")
-    public Reservation addReservation(
-            @Valid @RequestBody ReservationCreateDTO reservationDTO
-    ) {
+    public Reservation addReservation(@Valid @RequestBody ReservationCreateDTO reservationDTO) {
         return reservationService.addReservation(reservationDTO);
     }
 
@@ -39,6 +38,12 @@ public class ReservationController {
                                          @RequestBody Reservation reservation)
             throws ValidationException {
         return reservationService.updateReservation(uuid, reservation);
+    }
+
+    @PatchMapping("/reservation/{uuid}")
+    public Reservation patchReservation(@PathVariable UUID uuid,
+                                        @Valid @RequestBody ReservationUpdateDTO dto) {
+        return reservationService.patchReservation(uuid, dto);
     }
 
     @DeleteMapping("/reservation/{uuid}")

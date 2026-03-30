@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { CreatePersonDto, Person } from '../models/person.model';
+import { CreatePersonDto, Person, UpdatePersonDto } from '../models/person.model';
 
 const API_URL = 'http://localhost:8080/person';
 
@@ -13,6 +13,10 @@ export class PersonService {
     return this.http.get<Person[]>(API_URL);
   }
 
+  getById(id: string): Observable<Person> {
+    return this.http.get<Person>(`${API_URL}/${id}`);
+  }
+
   create(dto: CreatePersonDto): Observable<Person> {
     return this.http.post<Person>(API_URL, dto);
   }
@@ -21,8 +25,11 @@ export class PersonService {
     return this.http.put<Person>(`${API_URL}/${id}`, dto);
   }
 
+  patch(id: string, dto: UpdatePersonDto): Observable<Person> {
+    return this.http.patch<Person>(`${API_URL}/${id}`, dto);
+  }
+
   delete(id: string): Observable<void> {
     return this.http.delete<void>(`${API_URL}/${id}`);
   }
 }
-

@@ -3,6 +3,7 @@ package com.andrei.demo.controller;
 import com.andrei.demo.config.ValidationException;
 import com.andrei.demo.model.Event;
 import com.andrei.demo.model.EventCreateDTO;
+import com.andrei.demo.model.EventUpdateDTO;
 import com.andrei.demo.service.EventService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -28,15 +29,18 @@ public class EventController {
     }
 
     @PostMapping("/event")
-    public Event addEvent(
-            @Valid @RequestBody EventCreateDTO eventDTO
-    ) {
+    public Event addEvent(@Valid @RequestBody EventCreateDTO eventDTO) {
         return eventService.addEvent(eventDTO);
     }
 
     @PutMapping("/event/{uuid}")
     public Event updateEvent(@PathVariable UUID uuid, @RequestBody Event event) {
         return eventService.updateEvent(uuid, event);
+    }
+
+    @PatchMapping("/event/{uuid}")
+    public Event patchEvent(@PathVariable UUID uuid, @Valid @RequestBody EventUpdateDTO dto) {
+        return eventService.patchEvent(uuid, dto);
     }
 
     @DeleteMapping("/event/{uuid}")

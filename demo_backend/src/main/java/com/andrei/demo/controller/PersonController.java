@@ -2,6 +2,7 @@ package com.andrei.demo.controller;
 
 import com.andrei.demo.config.ValidationException;
 import com.andrei.demo.model.PersonCreateDTO;
+import com.andrei.demo.model.PersonUpdateDTO;
 import com.andrei.demo.service.PersonService;
 import com.andrei.demo.model.Person;
 import jakarta.validation.Valid;
@@ -34,9 +35,7 @@ public class PersonController {
     }
 
     @PostMapping("/person")
-    public Person addPerson(
-            @Valid @RequestBody PersonCreateDTO personDTO
-    ) {
+    public Person addPerson(@Valid @RequestBody PersonCreateDTO personDTO) {
         return personService.addPerson(personDTO);
     }
 
@@ -47,9 +46,14 @@ public class PersonController {
         return personService.updatePerson(uuid, person);
     }
 
+    @PatchMapping("/person/{uuid}")
+    public Person patchPerson(@PathVariable UUID uuid,
+                              @Valid @RequestBody PersonUpdateDTO dto) {
+        return personService.patchPerson(uuid, dto);
+    }
+
     @DeleteMapping("/person/{uuid}")
     public void deletePerson(@PathVariable UUID uuid) {
         personService.deletePerson(uuid);
     }
-
 }

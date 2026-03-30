@@ -3,6 +3,7 @@ package com.andrei.demo.service;
 import com.andrei.demo.config.ValidationException;
 import com.andrei.demo.model.Event;
 import com.andrei.demo.model.EventCreateDTO;
+import com.andrei.demo.model.EventUpdateDTO;
 import com.andrei.demo.model.Person;
 import com.andrei.demo.model.PersonRole;
 import com.andrei.demo.repository.EventRepository;
@@ -75,47 +76,41 @@ public class EventService {
         return eventRepository.save(existingEvent);
     }
 
-    public Event updateEvent2(UUID uuid, Event event) {
-        return eventRepository.findById(uuid)
-                .map(existingEvent -> {
-                    if (event.getOrganizer() != null) {
-                        Person organizer = null;
-                        try {
-                            organizer = personRepository.findById(event.getOrganizer().getId())
-                                    .orElseThrow(() ->
-                                            new ValidationException("Organizer with id " + event.getOrganizer().getId() + " not found"));
-                        } catch (ValidationException e) {
-                            throw new RuntimeException(e);
-                        }
+    public Event patchEvent(UUID uuid, EventUpdateDTO dto) {
+        Event existingEvent = eventRepository.findById(uuid)
+                .orElseThrow(() -> new ValidationException("Event with id " + uuid + " not found"));
 
-                        if (organizer.getRole() != PersonRole.ORGANIZER) {
-                            try {
-                                throw new ValidationException("Only organizers can be assigned to events");
-                            } catch (ValidationException e) {
-                                throw new RuntimeException(e);
-                            }
-                        }
+        if (dto.getTitle() != null) {
+            existingEvent.setTitle(dto.getTitle());
+        }
+        if (dto.getDescription() != null) {
+            existingEvent.setDescription(dto.getDescription());
+        }
+        if (dto.getLocation() != null) {
+            existingEvent.setLocation(dto.getLocation());
+        }
+        if (dto.getDate() != null) {
+            existingEvent.setDate(dto.getDate());
+        }
+        if (dto.getMaxParticipants() != null) {
+            existingEvent.setMaxParticipants(dto.getMaxParticipants());
+        }
+        if (dto.getOrganizerId() != null) {
+            Person organizer = personRepository.findById(dto.getOrganizerId())
+                    .orElseThrow(() -> new ValidationException("Organizer with id " + dto.getOrganizerId() + " not found"));
+            if (organizer.getRole() != PersonRole.ORGANIZER) {
+                throw new ValidationException("Only organizers can be assigned to events");
+            }
+            existingEvent.setOrganizer(organizer);
+        }
 
-                        existingEvent.setOrganizer(organizer);
-                    }
-
-                    existingEvent.setTitle(event.getTitle());
-                    existingEvent.setDescription(event.getDescription());
-                    existingEvent.setLocation(event.getLocation());
-                    existingEvent.setDate(event.getDate());
-                    existingEvent.setMaxParticipants(event.getMaxParticipants());
-
-                    return eventRepository.save(existingEvent);
-                })
-                .orElseThrow(() ->
-                        new ValidationException("Event with id " + uuid + " not found"));
+        return eventRepository.save(existingEvent);
     }
 
     public void deleteEvent(UUID uuid) throws ValidationException {
         if (!eventRepository.existsById(uuid)) {
             throw new ValidationException("Event with id " + uuid + " not found");
         }
-
         eventRepository.deleteById(uuid);
     }
 

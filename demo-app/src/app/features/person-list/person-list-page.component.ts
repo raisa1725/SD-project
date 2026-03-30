@@ -9,13 +9,14 @@ import { ConfirmDeleteDialogComponent } from '../../components/confirm-delete-di
 import {
   PersonFormDialogComponent,
   PersonFormDialogData,
-  PersonFormDialogResult,
+  PersonFormDialogResult
 } from '../../components/person-form-dialog/person-form-dialog.component';
 import { CreatePersonDto, Person, UpdatePersonDto } from '../../models/person.model';
 import { PersonListStore } from './person-list.store';
 
 @Component({
   selector: 'app-person-list-page',
+  standalone: true,
   imports: [MatTableModule, MatButtonModule, MatIconModule, MatDialogModule, MatToolbar],
   templateUrl: './person-list-page.component.html',
   styleUrl: './person-list-page.component.scss',
@@ -29,16 +30,14 @@ export class PersonListPageComponent {
   protected readonly persons = this.store.persons;
   protected readonly hasError = this.store.hasError;
   protected readonly isLoading = this.store.isLoading;
-  protected readonly displayedColumns = ['name', 'age', 'email', 'actions'];
+  protected readonly displayedColumns = ['name', 'age', 'email', 'role', 'actions'];
 
   constructor() {
     this.store.load();
   }
 
   protected openCreateDialog(): void {
-    if (this.isLoading()) {
-      return;
-    }
+    if (this.isLoading()) return;
 
     this.dialog
       .open<PersonFormDialogComponent, PersonFormDialogData, PersonFormDialogResult>(
@@ -49,32 +48,54 @@ export class PersonListPageComponent {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((result) => {
         if (!result) return;
-        this.store.create(result as CreatePersonDto);
+        const v = result;
+        const dto: CreatePersonDto = {
+          name: v.name,
+          age: v.age,
+          email: v.email,
+          password: v.password ?? '',
+          role: v.role,
+        };
+        this.store.create(dto);
       });
   }
 
   protected openEditDialog(person: Person): void {
-    if (this.isLoading()) {
-      return;
-    }
+    if (this.isLoading()) return;
 
     this.dialog
       .open<PersonFormDialogComponent, PersonFormDialogData, PersonFormDialogResult>(
         PersonFormDialogComponent,
-        { data: { title: 'Edit Person', submitLabel: 'Save', initialValue: person } },
+        {
+          data: {
+            title: 'Edit Person',
+            submitLabel: 'Save',
+            initialValue: {
+              name: person.name,
+              age: person.age,
+              email: person.email,
+              role: person.role,
+            },
+          },
+        },
       )
       .afterClosed()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((result) => {
         if (!result) return;
-        this.store.update(person.id, result as UpdatePersonDto);
+        const v = result;
+        const dto: UpdatePersonDto = {
+          name: v.name,
+          age: v.age,
+          email: v.email,
+          role: v.role,
+        };
+        this.store.update(person.id, dto);
       });
   }
 
   protected openDeleteDialog(person: Person): void {
-    if (this.isLoading()) {
-      return;
-    }
+    if (this.isLoading()) return;
 
     this.dialog
       .open<ConfirmDeleteDialogComponent, { person: Person }, boolean>(

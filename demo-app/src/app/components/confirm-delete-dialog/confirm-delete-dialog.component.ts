@@ -5,6 +5,7 @@ import { Person } from '../../models/person.model';
 
 @Component({
   selector: 'app-confirm-delete-dialog',
+  standalone: true,
   imports: [MatDialogModule, MatButtonModule],
   templateUrl: './confirm-delete-dialog.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -1,0 +1,70 @@
+<h2 mat-dialog-title>{{ data.title }}</h2>
+
+<mat-dialog-content>
+  <form [formGroup]="form" id="event-form" (ngSubmit)="submit()">
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Title</mat-label>
+      <input matInput formControlName="title" autocomplete="off" />
+      @if (form.controls.title.hasError('required')) {
+        <mat-error>Title is required.</mat-error>
+      } @else if (form.controls.title.hasError('minlength')) {
+        <mat-error>Title must be at least 3 characters.</mat-error>
+      } @else if (form.controls.title.hasError('maxlength')) {
+        <mat-error>Title must be at most 100 characters.</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Description</mat-label>
+      <textarea matInput formControlName="description" rows="3" autocomplete="off"></textarea>
+      @if (form.controls.description.hasError('maxlength')) {
+        <mat-error>Description must be at most 500 characters.</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Location</mat-label>
+      <input matInput formControlName="location" autocomplete="off" />
+      @if (form.controls.location.hasError('required')) {
+        <mat-error>Location is required.</mat-error>
+      } @else if (form.controls.location.hasError('minlength')) {
+        <mat-error>Location must be at least 2 characters.</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Date &amp; Time</mat-label>
+      <input matInput type="datetime-local" formControlName="date" />
+      @if (form.controls.date.hasError('required')) {
+        <mat-error>Date is required.</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Max Participants</mat-label>
+      <input matInput type="number" formControlName="maxParticipants" autocomplete="off" />
+      @if (form.controls.maxParticipants.hasError('required')) {
+        <mat-error>Max participants is required.</mat-error>
+      } @else if (form.controls.maxParticipants.hasError('min')) {
+        <mat-error>Must be at least 1.</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Organizer</mat-label>
+      <mat-select formControlName="organizerId">
+        @for (organizer of data.organizers; track organizer.id) {
+          <mat-option [value]="organizer.id">{{ organizer.name }} ({{ organizer.email }})</mat-option>
+        }
+      </mat-select>
+      @if (form.controls.organizerId.hasError('required')) {
+        <mat-error>Organizer is required.</mat-error>
+      }
+    </mat-form-field>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button type="button" (click)="cancel()">Cancel</button>
+  <button mat-flat-button type="submit" form="event-form">{{ data.submitLabel ?? 'Submit' }}</button>
+</mat-dialog-actions>

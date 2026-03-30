@@ -1,0 +1,58 @@
+<h2 mat-dialog-title>{{ data.title }}</h2>
+
+<mat-dialog-content>
+  <form [formGroup]="form" id="reservation-form" (ngSubmit)="submit()">
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Person</mat-label>
+      <mat-select formControlName="personId">
+        @for (person of data.persons; track person.id) {
+          <mat-option [value]="person.id">{{ person.name }} ({{ person.email }})</mat-option>
+        }
+      </mat-select>
+      @if (form.controls.personId.hasError('required')) {
+        <mat-error>Person is required.</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Event</mat-label>
+      <mat-select formControlName="eventId">
+        @for (event of data.events; track event.id) {
+          <mat-option [value]="event.id">{{ event.title }} — {{ event.location }}</mat-option>
+        }
+      </mat-select>
+      @if (form.controls.eventId.hasError('required')) {
+        <mat-error>Event is required.</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Spots Reserved</mat-label>
+      <input matInput type="number" formControlName="spotsReserved" autocomplete="off" />
+      @if (form.controls.spotsReserved.hasError('required')) {
+        <mat-error>Spots reserved is required.</mat-error>
+      } @else if (form.controls.spotsReserved.hasError('min')) {
+        <mat-error>Must reserve at least 1 spot.</mat-error>
+      }
+    </mat-form-field>
+
+    @if (data.isEdit) {
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Status</mat-label>
+        <mat-select formControlName="status">
+          @for (status of statuses; track status) {
+            <mat-option [value]="status">{{ status }}</mat-option>
+          }
+        </mat-select>
+        @if (form.controls.status.hasError('required')) {
+          <mat-error>Status is required.</mat-error>
+        }
+      </mat-form-field>
+    }
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button type="button" (click)="cancel()">Cancel</button>
+  <button mat-flat-button type="submit" form="reservation-form">{{ data.submitLabel ?? 'Submit' }}</button>
+</mat-dialog-actions>
