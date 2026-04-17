@@ -1,5 +1,4 @@
 import { Routes } from '@angular/router';
-// @ts-ignore
 import { authGuard, guestGuard } from './guards/auth.guard';
 
 export const routes: Routes = [

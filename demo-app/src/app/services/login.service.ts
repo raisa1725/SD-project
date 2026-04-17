@@ -1,17 +1,25 @@
-import { inject } from '@angular/core';
-import { CanActivateFn, Router } from '@angular/router';
-import { LoginStore } from '../features/login/login.store';
+import { inject, Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
 
-export const authGuard: CanActivateFn = () => {
-  const loginStore = inject(LoginStore);
-  const router = inject(Router);
+const API_URL = 'http://localhost:8080/login';
 
-  return loginStore.isAuthenticated() ? true : router.createUrlTree(['/login']);
-};
+export interface LoginRequest {
+  email: string;
+  password: string;
+}
 
-export const guestGuard: CanActivateFn = () => {
-  const loginStore = inject(LoginStore);
-  const router = inject(Router);
+export interface LoginResponse {
+  success: boolean;
+  role: string | null;
+  errorMessage: string | null;
+}
 
-  return loginStore.isAuthenticated() ? router.createUrlTree(['/people']) : true;
-};
+@Injectable({ providedIn: 'root' })
+export class LoginService {
+  private readonly http = inject(HttpClient);
+
+  login(request: LoginRequest): Observable<LoginResponse> {
+    return this.http.post<LoginResponse>(API_URL, request);
+  }
+}
