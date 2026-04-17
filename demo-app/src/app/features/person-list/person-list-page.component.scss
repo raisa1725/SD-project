@@ -86,3 +86,13 @@
   background-color: #f3e5f5;
   color: #6a1b9a;
 }
+
+.page-toolbar {
+  .toolbar-title {
+    font-weight: 500;
+  }
+
+  .toolbar-spacer {
+    flex: 1 1 auto;
+  }
+}

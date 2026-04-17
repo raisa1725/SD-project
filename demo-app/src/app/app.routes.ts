@@ -1,13 +1,22 @@
 import { Routes } from '@angular/router';
+// @ts-ignore
+import { authGuard, guestGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
   {
     path: '',
     pathMatch: 'full',
-    redirectTo: 'people',
+    redirectTo: 'login',
+  },
+  {
+    path: 'login',
+    canActivate: [guestGuard],
+    loadComponent: () =>
+      import('./features/login/login.component').then((m) => m.LoginComponent),
   },
   {
     path: 'people',
+    canActivate: [authGuard],
     loadComponent: () =>
       import('./features/person-list/person-list-page.component').then(
         (m) => m.PersonListPageComponent,
