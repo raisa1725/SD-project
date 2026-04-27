@@ -16,16 +16,25 @@ public interface EventRepository extends JpaRepository<Event, UUID> {
 
     Optional<Event> findByTitle(String title);
 
-    // JPA Derived Query
     List<Event> findByLocation(String location);
 
     List<Event> findByOrganizer(Person organizer);
 
     List<Event> findByDateAfter(LocalDateTime date);
 
-    // find events whose title starts or ends with the given string
     @Query("SELECT e FROM Event e WHERE e.title LIKE CONCAT(?1, '%') OR e.title LIKE CONCAT('%', ?1)")
     List<Event> findByTitleApproximate(String title);
 
     List<Event> findByTitleStartingWithOrTitleEndingWith(String start, String end);
+
+    List<Event> findByTitleContainingIgnoreCase(String title);
+
+    List<Event> findByLocationContainingIgnoreCase(String location);
+
+    List<Event> findByDateAfterOrderByDateAsc(java.time.LocalDateTime date);
+
+    List<Event> findByTitleContainingIgnoreCaseAndLocationContainingIgnoreCase(
+            String title,
+            String location
+    );
 }

@@ -125,14 +125,26 @@ class PersonServiceTests {
 
     @Test
     void testDeletePerson() {
-        // given:
-        UUID uuid = UUID.randomUUID();
+        UUID personId = UUID.randomUUID();
 
-        // when:
-        doNothing().when(personRepository).deleteById(uuid);
-        personService.deletePerson(uuid);
+        when(personRepository.existsById(personId)).thenReturn(true);
+        doNothing().when(personRepository).deleteById(personId);
 
-        // then:
-        verify(personRepository, times(1)).deleteById(uuid);
+        personService.deletePerson(personId);
+
+        verify(personRepository).existsById(personId);
+        verify(personRepository).deleteById(personId);
+    }
+
+    @Test
+    void testDeletePerson_MissingId() {
+        UUID personId = UUID.randomUUID();
+
+        when(personRepository.existsById(personId)).thenReturn(false);
+
+        assertThrows(ValidationException.class, () -> personService.deletePerson(personId));
+
+        verify(personRepository).existsById(personId);
+        verify(personRepository, never()).deleteById(any(UUID.class));
     }
 }

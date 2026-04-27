@@ -2,6 +2,7 @@ package com.andrei.demo.service;
 
 import com.andrei.demo.model.LoginResponse;
 import com.andrei.demo.model.Person;
+import com.andrei.demo.model.PersonRole;
 import com.andrei.demo.repository.PersonRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -38,18 +39,26 @@ class SecurityServiceTests {
 
     @Test
     void testLoginSuccess() {
-        String email = "john@example.com";
-        String password = "password";
         Person person = new Person();
-        person.setEmail(email);
-        person.setPassword(password);
+        person.setName("John Doe");
+        person.setEmail("john.doe@example.com");
+        person.setPassword("Password_john123!@#");
+        person.setAge(30);
+        person.setRole(PersonRole.USER);
 
-        when(personRepository.findByEmail(email)).thenReturn(Optional.of(person));
-        LoginResponse result = securityService.login(email, password);
+        when(personRepository.findByEmail("john.doe@example.com"))
+                .thenReturn(Optional.of(person));
 
-        assertTrue(result.success());
-        assertEquals("ADMIN", result.role());
-        verify(personRepository, times(1)).findByEmail(email);
+        LoginResponse response = securityService.login(
+                "john.doe@example.com",
+                "Password_john123!@#"
+        );
+
+        assertTrue(response.success());
+        assertEquals("USER", response.role());
+        assertNull(response.errorMessage());
+
+        verify(personRepository).findByEmail("john.doe@example.com");
     }
 
     @Test

@@ -39,8 +39,8 @@ public class ReservationService {
                 .orElseThrow(() ->
                         new ValidationException("Event with id " + reservationDTO.getEventId() + " not found"));
 
-        if (person.getRole() == PersonRole.ORGANIZER) {
-            throw new ValidationException("Organizers cannot reserve spots for events");
+        if (person.getRole() != PersonRole.USER && person.getRole() != PersonRole.ORGANIZER) {
+            throw new ValidationException("Only users & organizers can reserve spots for events");
         }
 
         if (reservationDTO.getSpotsReserved() <= 0) {

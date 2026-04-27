@@ -3,9 +3,12 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { catchError, finalize, Observable, of, tap } from 'rxjs';
 import { LoginRequest, LoginResponse, LoginService } from '../../services/login.service';
 
+type UserRole = 'USER' | 'ORGANIZER' | 'ADMIN';
+
 interface AuthSnapshot {
   isAuthenticated: boolean;
-  role: string | null;
+  role: UserRole | null;
+  email: string | null;
 }
 
 const STORAGE_KEY = 'demo-app-auth';
@@ -17,7 +20,8 @@ export class LoginStore {
   readonly isSubmitting = signal(false);
   readonly errorMessage = signal<string | null>(null);
   readonly isAuthenticated = signal(false);
-  readonly role = signal<string | null>(null);
+  readonly role = signal<UserRole | null>(null);
+  readonly email = signal<string | null>(null);
 
   constructor() {
     this.restoreAuthState();
@@ -28,10 +32,10 @@ export class LoginStore {
     this.isSubmitting.set(true);
 
     return this.loginService.login(request).pipe(
-      tap((response) => this.applyResponse(response)),
+      tap((response) => this.applyResponse(response, request.email)),
       catchError((error: unknown) => {
         const response = this.normalizeError(error);
-        this.applyResponse(response);
+        this.applyResponse(response, null);
         return of(response);
       }),
       finalize(() => this.isSubmitting.set(false)),
@@ -42,10 +46,11 @@ export class LoginStore {
     this.clearSession();
   }
 
-  private applyResponse(response: LoginResponse): void {
+  private applyResponse(response: LoginResponse, email: string | null): void {
     if (response.success) {
       this.isAuthenticated.set(true);
-      this.role.set(response.role);
+      this.role.set((response.role as UserRole) ?? null);
+      this.email.set(email);
       this.errorMessage.set(null);
       this.persistAuthState();
       return;
@@ -57,6 +62,7 @@ export class LoginStore {
   private normalizeError(error: unknown): LoginResponse {
     if (error instanceof HttpErrorResponse && error.error) {
       const maybeError = error.error as Partial<LoginResponse>;
+
       if (typeof maybeError.success === 'boolean') {
         return {
           success: maybeError.success,
@@ -79,14 +85,17 @@ export class LoginStore {
 
   private restoreAuthState(): void {
     const stored = sessionStorage.getItem(STORAGE_KEY);
+
     if (!stored) {
       return;
     }
 
     try {
       const snapshot = JSON.parse(stored) as AuthSnapshot;
+
       this.isAuthenticated.set(snapshot.isAuthenticated);
       this.role.set(snapshot.role ?? null);
+      this.email.set(snapshot.email ?? null);
     } catch {
       this.clearSession();
     }
@@ -96,6 +105,7 @@ export class LoginStore {
     const snapshot: AuthSnapshot = {
       isAuthenticated: this.isAuthenticated(),
       role: this.role(),
+      email: this.email(),
     };
 
     sessionStorage.setItem(STORAGE_KEY, JSON.stringify(snapshot));
@@ -104,6 +114,7 @@ export class LoginStore {
   private clearSession(errorMessage: string | null = null): void {
     this.isAuthenticated.set(false);
     this.role.set(null);
+    this.email.set(null);
     this.errorMessage.set(errorMessage);
     sessionStorage.removeItem(STORAGE_KEY);
   }

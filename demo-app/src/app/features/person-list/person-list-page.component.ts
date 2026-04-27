@@ -4,7 +4,6 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTableModule } from '@angular/material/table';
-import { MatToolbar } from '@angular/material/toolbar';
 import { ConfirmDeleteDialogComponent } from '../../components/confirm-delete-dialog/confirm-delete-dialog.component';
 import {
   PersonFormDialogComponent,
@@ -19,7 +18,7 @@ import { LoginStore } from '../login/login.store';
 @Component({
   selector: 'app-person-list-page',
   standalone: true,
-  imports: [MatTableModule, MatButtonModule, MatIconModule, MatDialogModule, MatToolbar],
+  imports: [ MatTableModule, MatButtonModule, MatIconModule, MatDialogModule ],
   templateUrl: './person-list-page.component.html',
   styleUrl: './person-list-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -117,5 +116,11 @@ export class PersonListPageComponent {
         if (!confirmed) return;
         this.store.remove(person.id);
       });
+  }
+
+  protected promote(person: Person): void {
+    if (this.isLoading()) return;
+
+    this.store.promote(person.id);
   }
 }

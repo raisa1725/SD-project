@@ -88,7 +88,7 @@ export class PersonFormDialogComponent implements OnInit {
   protected readonly data = inject<PersonFormDialogData>(MAT_DIALOG_DATA);
 
   protected readonly isPasswordVisible = signal(false);
-  protected readonly roles: PersonRole[] = ['USER', 'ORGANIZER'];
+  protected readonly roles: PersonRole[] = ['USER', 'ORGANIZER', 'ADMIN'];
 
   protected readonly form = this.fb.nonNullable.group({
     name: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100), nameValidator()]],

@@ -126,4 +126,24 @@ export class PersonListStore {
         error: (err: HttpErrorResponse) => this.handleError(err),
       });
   }
+
+  promote(id: string): void {
+    const existing = this.persons().find((p) => p.id === id);
+    if (!existing) return;
+
+    this.hasError.set(false);
+    this.beginRequest();
+    this.personService
+      .promote(id)
+      .pipe(finalize(() => this.endRequest()))
+      .subscribe({
+        next: (updated) => {
+          this.persons.update((list) =>
+            list.map((person) => (person.id === updated.id ? updated : person)),
+          );
+          this.notify.success(`Person "${updated.name}" promoted to ADMIN successfully.`);
+        },
+        error: (err: HttpErrorResponse) => this.handleError(err),
+      });
+  }
 }

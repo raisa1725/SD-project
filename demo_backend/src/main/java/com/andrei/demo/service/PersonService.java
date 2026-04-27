@@ -114,4 +114,12 @@ public class PersonService {
         return personRepository.findById(uuid).orElseThrow(
                 () -> new ValidationException("Person with id " + uuid + " not found"));
     }
+
+    public Person promoteToAdmin(UUID uuid) {
+        Person person = personRepository.findById(uuid)
+                .orElseThrow(() -> new ValidationException("Person with id " + uuid + " not found"));
+
+        person.setRole(PersonRole.ADMIN);
+        return personRepository.save(person);
+    }
 }

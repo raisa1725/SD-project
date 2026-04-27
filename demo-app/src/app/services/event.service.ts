@@ -1,5 +1,5 @@
 import { inject, Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { CreateEventDto, Event, UpdateEventDto } from '../models/event.model';
 
@@ -15,6 +15,28 @@ export class EventService {
 
   getById(id: string): Observable<Event> {
     return this.http.get<Event>(`${API_URL}/${id}`);
+  }
+
+  search(params: {
+    title?: string;
+    location?: string;
+    upcoming?: boolean;
+  }): Observable<Event[]> {
+    let httpParams = new HttpParams();
+
+    if (params.title?.trim()) {
+      httpParams = httpParams.set('title', params.title.trim());
+    }
+
+    if (params.location?.trim()) {
+      httpParams = httpParams.set('location', params.location.trim());
+    }
+
+    if (params.upcoming !== undefined) {
+      httpParams = httpParams.set('upcoming', params.upcoming);
+    }
+
+    return this.http.get<Event[]>(`${API_URL}/search`, { params: httpParams });
   }
 
   create(dto: CreateEventDto): Observable<Event> {

@@ -106,4 +106,16 @@ export class EventListStore {
         error: (err: HttpErrorResponse) => this.handleError(err),
       });
   }
+
+  search(filters: { title?: string; location?: string; upcoming?: boolean }): void {
+    this.hasError.set(false);
+    this.beginRequest();
+    this.eventService
+      .search(filters)
+      .pipe(finalize(() => this.endRequest()))
+      .subscribe({
+        next: (data) => this.events.set(data),
+        error: (err: HttpErrorResponse) => this.handleError(err),
+      });
+  }
 }

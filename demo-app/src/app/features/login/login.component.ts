@@ -43,16 +43,26 @@ export class LoginComponent {
     }
 
     const { email, password } = this.loginForm.getRawValue();
+
     this.loginStore
       .login({ email: email.trim(), password })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((response) => {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         if (!response.success) {
           return;
         }
 
-        void this.router.navigate(['/people']);
+        if (response.role === 'ADMIN') {
+          void this.router.navigate(['/admin/persons']);
+          return;
+        }
+
+        if (response.role === 'ORGANIZER') {
+          void this.router.navigate(['/feed']);
+          return;
+        }
+
+        void this.router.navigate(['/feed']);
       });
   }
 }

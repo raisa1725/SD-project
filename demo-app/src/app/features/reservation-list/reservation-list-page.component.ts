@@ -4,7 +4,6 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTableModule } from '@angular/material/table';
-import { MatToolbar } from '@angular/material/toolbar';
 import { ConfirmDeleteDialogComponent } from '../../components/confirm-delete-dialog/confirm-delete-dialog.component';
 import {
   ReservationFormDialogComponent,
@@ -18,11 +17,13 @@ import { ReservationListStore } from './reservation-list.store';
 import { PersonService } from '../../services/person.service';
 import { EventService } from '../../services/event.service';
 import { forkJoin } from 'rxjs';
+import { Router } from '@angular/router';
+import { LoginStore } from '../login/login.store';
 
 @Component({
   selector: 'app-reservation-list-page',
   standalone: true,
-  imports: [MatTableModule, MatButtonModule, MatIconModule, MatDialogModule, MatToolbar],
+  imports: [MatTableModule, MatButtonModule, MatIconModule, MatDialogModule ],
   templateUrl: './reservation-list-page.component.html',
   styleUrl: './reservation-list-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -40,6 +41,8 @@ export class ReservationListPageComponent implements OnInit {
   protected readonly persons = signal<Person[]>([]);
   protected readonly events = signal<Event[]>([]);
   protected readonly displayedColumns = ['person', 'event', 'spotsReserved', 'status', 'actions'];
+  private readonly loginStore = inject(LoginStore);
+  private readonly router = inject(Router);
 
   ngOnInit(): void {
     this.store.load();
@@ -76,6 +79,11 @@ export class ReservationListPageComponent implements OnInit {
         if (!result) return;
         this.store.create(result as CreateReservationDto);
       });
+  }
+
+  protected logout(): void {
+    this.loginStore.logout();
+    void this.router.navigate(['/login']);
   }
 
   protected openEditDialog(reservation: Reservation): void {

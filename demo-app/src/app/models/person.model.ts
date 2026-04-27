@@ -1,4 +1,4 @@
-export type PersonRole = 'USER' | 'ORGANIZER';
+export type PersonRole = 'USER' | 'ORGANIZER' | 'ADMIN';
 
 export interface Person {
   id: string;
@@ -9,5 +9,18 @@ export interface Person {
   role: PersonRole;
 }
 
-export type CreatePersonDto = Omit<Person, 'id'>;
-export type UpdatePersonDto = Partial<Omit<Person, 'id'>>;
+export interface CreatePersonDto {
+  name: string;
+  age: number;
+  email: string;
+  password: string;
+  role: PersonRole;
+}
+
+export interface UpdatePersonDto {
+  name?: string;
+  age?: number;
+  email?: string;
+  password?: string;
+  role?: PersonRole;
+}

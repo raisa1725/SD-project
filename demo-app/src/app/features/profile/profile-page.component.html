@@ -1,0 +1,66 @@
+<main class="content">
+  <header class="page-header">
+    <div>
+      <h1 class="page-title">My Profile</h1>
+      <p class="page-subtitle">View your account information and reservations.</p>
+    </div>
+
+    <button
+      mat-flat-button
+      type="button"
+      (click)="openEditProfileDialog()"
+      [disabled]="!person()"
+    >
+      <mat-icon>edit</mat-icon>
+      Edit Profile
+    </button>
+  </header>
+
+  @if (person(); as currentPerson) {
+    <section class="profile-card">
+      <h2>{{ currentPerson.name }}</h2>
+      <p><strong>Email:</strong> {{ currentPerson.email }}</p>
+      <p><strong>Age:</strong> {{ currentPerson.age }}</p>
+      <p><strong>Role:</strong> {{ currentPerson.role }}</p>
+    </section>
+  } @else {
+    <p>Loading profile...</p>
+  }
+
+  <section class="reservations-section">
+    <h2>My Reservations</h2>
+
+    <table mat-table [dataSource]="userReservations()" aria-label="My reservations table">
+      <ng-container matColumnDef="event">
+        <th mat-header-cell *matHeaderCellDef scope="col">Event</th>
+        <td mat-cell *matCellDef="let reservation">{{ reservation.event.title }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="date">
+        <th mat-header-cell *matHeaderCellDef scope="col">Date</th>
+        <td mat-cell *matCellDef="let reservation">
+          {{ reservation.event.date | date: 'dd/MM/yyyy HH:mm' }}
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="spotsReserved">
+        <th mat-header-cell *matHeaderCellDef scope="col">Spots</th>
+        <td mat-cell *matCellDef="let reservation">{{ reservation.spotsReserved }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="status">
+        <th mat-header-cell *matHeaderCellDef scope="col">Status</th>
+        <td mat-cell *matCellDef="let reservation">{{ reservation.status }}</td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+
+      <tr class="mat-mdc-row" *matNoDataRow>
+        <td [attr.colspan]="displayedColumns.length" class="no-data-cell">
+          You do not have any reservations yet.
+        </td>
+      </tr>
+    </table>
+  </section>
+</main>

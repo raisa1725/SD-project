@@ -10,7 +10,9 @@ import com.andrei.demo.repository.EventRepository;
 import com.andrei.demo.repository.PersonRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
-
+import java.time.LocalDateTime;
+import java.util.Comparator;
+import java.util.stream.Stream;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -31,8 +33,8 @@ public class EventService {
                 .orElseThrow(() ->
                         new ValidationException("Organizer with id " + eventDTO.getOrganizerId() + " not found"));
 
-        if (organizer.getRole() != PersonRole.ORGANIZER) {
-            throw new ValidationException("Only organizers can create events");
+        if (organizer.getRole() != PersonRole.ORGANIZER && organizer.getRole() != PersonRole.ADMIN) {
+            throw new ValidationException("Only organizers or admins can create events");
         }
 
         Event event = new Event();
@@ -60,8 +62,8 @@ public class EventService {
                     .orElseThrow(() ->
                             new ValidationException("Organizer with id " + event.getOrganizer().getId() + " not found"));
 
-            if (organizer.getRole() != PersonRole.ORGANIZER) {
-                throw new ValidationException("Only organizers can be assigned to events");
+            if (organizer.getRole() != PersonRole.ORGANIZER && organizer.getRole() != PersonRole.ADMIN) {
+                throw new ValidationException("Only organizers or admins can create events");
             }
 
             existingEvent.setOrganizer(organizer);
@@ -98,8 +100,8 @@ public class EventService {
         if (dto.getOrganizerId() != null) {
             Person organizer = personRepository.findById(dto.getOrganizerId())
                     .orElseThrow(() -> new ValidationException("Organizer with id " + dto.getOrganizerId() + " not found"));
-            if (organizer.getRole() != PersonRole.ORGANIZER) {
-                throw new ValidationException("Only organizers can be assigned to events");
+            if (organizer.getRole() != PersonRole.ORGANIZER && organizer.getRole() != PersonRole.ADMIN) {
+                throw new ValidationException("Only organizers or admins can create events");
             }
             existingEvent.setOrganizer(organizer);
         }
@@ -117,5 +119,37 @@ public class EventService {
     public Event getEventById(UUID uuid) throws ValidationException {
         return eventRepository.findById(uuid).orElseThrow(
                 () -> new ValidationException("Event with id " + uuid + " not found"));
+    }
+
+    public List<Event> searchEvents(String title, String location, Boolean upcoming) {
+        Stream<Event> stream = eventRepository.findAll().stream();
+
+        if (title != null && !title.isBlank()) {
+            String normalizedTitle = title.toLowerCase();
+            stream = stream.filter(event ->
+                    event.getTitle() != null &&
+                            event.getTitle().toLowerCase().contains(normalizedTitle)
+            );
+        }
+
+        if (location != null && !location.isBlank()) {
+            String normalizedLocation = location.toLowerCase();
+            stream = stream.filter(event ->
+                    event.getLocation() != null &&
+                            event.getLocation().toLowerCase().contains(normalizedLocation)
+            );
+        }
+
+        if (Boolean.TRUE.equals(upcoming)) {
+            LocalDateTime now = LocalDateTime.now();
+            stream = stream.filter(event ->
+                    event.getDate() != null &&
+                            event.getDate().isAfter(now)
+            );
+        }
+
+        return stream
+                .sorted(Comparator.comparing(Event::getDate))
+                .toList();
     }
 }

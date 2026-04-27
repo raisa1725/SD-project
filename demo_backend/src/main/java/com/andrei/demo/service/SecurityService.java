@@ -14,19 +14,34 @@ public class SecurityService {
     private final PersonRepository personRepository;
 
     public LoginResponse login(String email, String password) {
+        if (email == null || email.isBlank()) {
+            return new LoginResponse(false, null, "Email is required");
+        }
+
+        if (password == null || password.isBlank()) {
+            return new LoginResponse(false, null, "Password is required");
+        }
+
         Optional<Person> maybePerson = personRepository.findByEmail(email);
-        if(maybePerson.isEmpty()) {
+
+        if (maybePerson.isEmpty()) {
             return new LoginResponse(
                     false,
                     null,
                     "Person with email " + email + " not found"
             );
         }
+
         Person person = maybePerson.get();
-        if(person.getPassword().equals(password)) {
-            return new LoginResponse(true, "ADMIN", null);
-        } else {
+
+        if (!person.getPassword().equals(password)) {
             return new LoginResponse(false, null, "Incorrect password");
         }
+
+        return new LoginResponse(
+                true,
+                person.getRole().name(),
+                null
+        );
     }
 }

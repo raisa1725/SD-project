@@ -32,4 +32,12 @@ export class PersonService {
   delete(id: string): Observable<void> {
     return this.http.delete<void>(`${API_URL}/${id}`);
   }
+
+  promote(id: string): Observable<Person> {
+    return this.http.patch<Person>(`${API_URL}/${id}/promote`, {});
+  }
+
+  getByEmail(email: string): Observable<Person> {
+    return this.http.get<Person>(`${API_URL}/email/${email}`);
+  }
 }

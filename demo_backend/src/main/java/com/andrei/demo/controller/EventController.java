@@ -23,6 +23,15 @@ public class EventController {
         return eventService.getEvents();
     }
 
+    @GetMapping("/event/search")
+    public List<Event> searchEvents(
+            @RequestParam(required = false) String title,
+            @RequestParam(required = false) String location,
+            @RequestParam(required = false) Boolean upcoming
+    ) {
+        return eventService.searchEvents(title, location, upcoming);
+    }
+
     @GetMapping("/event/{uuid}")
     public Event getEventById(@PathVariable UUID uuid) {
         return eventService.getEventById(uuid);
