@@ -1,0 +1,49 @@
+<h2 mat-dialog-title>
+  {{ data.event.title }}
+</h2>
+
+<mat-dialog-content class="dialog-content">
+  <p class="description">
+    {{ data.event.description || 'No description available.' }}
+  </p>
+
+  <div class="details-grid">
+    <div class="detail-card">
+      <span class="label">Location</span>
+      <strong>{{ data.event.location }}</strong>
+    </div>
+
+    <div class="detail-card">
+      <span class="label">Date</span>
+      <strong>
+        {{ data.event.date | date: 'dd/MM/yyyy HH:mm' }}
+      </strong>
+    </div>
+
+    <div class="detail-card">
+      <span class="label">Available seats</span>
+      <strong>{{ data.event.maxParticipants }}</strong>
+    </div>
+
+    <div class="detail-card">
+      <span class="label">Organizer</span>
+      <strong>{{ data.event.organizer.name }}</strong>
+    </div>
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close type="button">
+    Close
+  </button>
+
+  @if (data.canReserve) {
+    <button
+      mat-flat-button
+      type="button"
+      (click)="reserve()"
+    >
+      Make Reservation
+    </button>
+  }
+</mat-dialog-actions>

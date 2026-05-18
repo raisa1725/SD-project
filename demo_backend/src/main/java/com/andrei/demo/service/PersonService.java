@@ -7,6 +7,7 @@ import com.andrei.demo.model.PersonCreateDTO;
 import com.andrei.demo.model.PersonRole;
 import com.andrei.demo.model.PersonUpdateDTO;
 import com.andrei.demo.repository.PersonRepository;
+import com.andrei.demo.util.PasswordUtil;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -17,7 +18,9 @@ import java.util.UUID;
 @Service
 @AllArgsConstructor
 public class PersonService {
+
     private final PersonRepository personRepository;
+    private final PasswordUtil passwordUtil;
 
     public List<Person> getPeople() {
         return personRepository.findAll();
@@ -32,31 +35,28 @@ public class PersonService {
         person.setName(personDTO.getName());
         person.setAge(personDTO.getAge());
         person.setEmail(personDTO.getEmail());
-        person.setPassword(personDTO.getPassword());
+
+        String hashedPassword = passwordUtil.hashPassword(personDTO.getPassword());
+        person.setPassword(hashedPassword);
+
         person.setRole(personDTO.getRole() != null ? personDTO.getRole() : PersonRole.USER);
 
         return personRepository.save(person);
     }
 
     public Person updatePerson(UUID uuid, Person person) {
-        Optional<Person> personOptional = personRepository.findById(uuid);
-
-        if (personOptional.isEmpty()) {
-            throw new ValidationException("Person with id " + uuid + " not found");
-        }
+        Person existingPerson = personRepository.findById(uuid)
+                .orElseThrow(() -> new ValidationException("Person with id " + uuid + " not found"));
 
         Optional<Person> personWithSameEmail = personRepository.findByEmail(person.getEmail());
         if (personWithSameEmail.isPresent() && !personWithSameEmail.get().getId().equals(uuid)) {
             throw new FieldValidationException("email", "Email must be unique. This email is already used");
         }
 
-        Person existingPerson = personOptional.get();
         existingPerson.setName(person.getName());
         existingPerson.setAge(person.getAge());
         existingPerson.setEmail(person.getEmail());
-        if (person.getPassword() != null && !person.getPassword().isBlank()) {
-            existingPerson.setPassword(person.getPassword());
-        }
+
         if (person.getRole() != null) {
             existingPerson.setRole(person.getRole());
         }
@@ -87,10 +87,6 @@ public class PersonService {
             existingPerson.setAge(dto.getAge());
         }
 
-        if (dto.getPassword() != null && !dto.getPassword().isBlank()) {
-            existingPerson.setPassword(dto.getPassword());
-        }
-
         if (dto.getRole() != null) {
             existingPerson.setRole(dto.getRole());
         }
@@ -102,17 +98,18 @@ public class PersonService {
         if (!personRepository.existsById(uuid)) {
             throw new ValidationException("Person with id " + uuid + " not found");
         }
+
         personRepository.deleteById(uuid);
     }
 
     public Person getPersonByEmail(String email) {
-        return personRepository.findByEmail(email).orElseThrow(
-                () -> new ValidationException("Person with email " + email + " not found"));
+        return personRepository.findByEmail(email)
+                .orElseThrow(() -> new ValidationException("Person with email " + email + " not found"));
     }
 
     public Person getPersonById(UUID uuid) {
-        return personRepository.findById(uuid).orElseThrow(
-                () -> new ValidationException("Person with id " + uuid + " not found"));
+        return personRepository.findById(uuid)
+                .orElseThrow(() -> new ValidationException("Person with id " + uuid + " not found"));
     }
 
     public Person promoteToAdmin(UUID uuid) {

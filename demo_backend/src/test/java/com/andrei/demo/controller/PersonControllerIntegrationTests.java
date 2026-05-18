@@ -2,6 +2,7 @@ package com.andrei.demo.controller;
 
 import com.andrei.demo.model.Person;
 import com.andrei.demo.repository.PersonRepository;
+import com.andrei.demo.util.JwtUtil;
 import com.andrei.demo.repository.EventRepository;
 import com.andrei.demo.repository.ReservationRepository;
 import org.hamcrest.Matchers;
@@ -36,6 +37,9 @@ public class PersonControllerIntegrationTests {
     private PersonRepository personRepository;
 
     @Autowired
+    private JwtUtil jwtUtil;
+
+    @Autowired
     private EventRepository eventRepository;
 
     @Autowired
@@ -43,6 +47,7 @@ public class PersonControllerIntegrationTests {
 
     private static final String FIXTURE_PATH = "src/test/resources/fixtures/";
     private static final ObjectMapper objectMapper = new ObjectMapper();
+    private String authToken;
 
     @BeforeEach
     void setUp() throws Exception {
@@ -55,6 +60,7 @@ public class PersonControllerIntegrationTests {
         personRepository.flush();
 
         seedDatabase();
+        initializeAuthToken();
     }
 
     private void seedDatabase() throws Exception {
@@ -63,10 +69,16 @@ public class PersonControllerIntegrationTests {
         personRepository.saveAll(people);
     }
 
+    private void initializeAuthToken() {
+        Person authPerson = personRepository.findAll().stream().findFirst().orElseThrow(
+                () -> new IllegalStateException("No seeded person available for auth token"));
+        authToken = jwtUtil.createToken(authPerson);
+    }
 
     @Test
     void testGetPeople() throws Exception {
-        mockMvc.perform(get("/person"))
+        mockMvc.perform(get("/person")
+                .header("Authorization", "Bearer " + authToken))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()")
                         .value(2))
@@ -85,12 +97,13 @@ public class PersonControllerIntegrationTests {
         String validPersonJson = loadFixture("valid_person.json");
 
         mockMvc.perform(post("/person")
+                        .header("Authorization", "Bearer " + authToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(validPersonJson))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").exists())
                 .andExpect(jsonPath("$.name").value("Alice Smith"))
-                .andExpect(jsonPath("$.password").value("Securepass123!@#"))
+                .andExpect(jsonPath("$.password", Matchers.startsWith("$2")))
                 .andExpect(jsonPath("$.age").value(28))
                 .andExpect(jsonPath("$.email").value("alice.smith@example.com"));
     }
@@ -98,8 +111,9 @@ public class PersonControllerIntegrationTests {
     @Test
     void testAddPerson_InvalidPayload() throws Exception {
         String invalidPersonJson = loadFixture("invalid_person.json");
-        System.out.println(invalidPersonJson);
+
         mockMvc.perform(post("/person")
+                        .header("Authorization", "Bearer " + authToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(invalidPersonJson))
                 .andExpect(status().isBadRequest())

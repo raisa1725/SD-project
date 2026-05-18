@@ -66,3 +66,55 @@
 .delete-btn {
   color: #c62828;
 }
+
+.view-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.events-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 16px;
+}
+
+.events-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.event-card {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px;
+  border: 1px solid #e0e0e0;
+  border-radius: 16px;
+  background: white;
+  cursor: pointer;
+  transition: 0.2s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  }
+
+  h2 {
+    margin: 0 0 8px;
+    font-size: 1.1rem;
+  }
+
+  p {
+    margin: 4px 0;
+    color: #555;
+  }
+}
+
+.card-actions {
+  display: flex;
+  align-items: flex-start;
+  gap: 4px;
+}

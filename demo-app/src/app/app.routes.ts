@@ -56,7 +56,13 @@ export const routes: Routes = [
         (m) => m.EventListPageComponent,
       ),
   },
-
+  {
+    path: 'forgot-password',
+    loadComponent: () =>
+      import('./features/forgot-password/forgot-password.component').then(
+        (m) => m.ForgotPasswordComponent,
+      ),
+  },
   {
     path: 'events',
     redirectTo: 'feed',
@@ -76,7 +82,7 @@ export const routes: Routes = [
   {
     path: 'profile',
     canActivate: [authGuard],
-    data: { roles: ['USER', 'ORGANIZER'] },
+    data: { roles: ['USER', 'ORGANIZER', 'ADMIN'] },
     loadComponent: () =>
       import('./features/profile/profile-page.component').then(
         ({ ProfilePageComponent }) => ProfilePageComponent,

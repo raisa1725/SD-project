@@ -65,4 +65,11 @@ export class LoginComponent {
         void this.router.navigate(['/feed']);
       });
   }
+
+  goToForgotPassword(event?: Event): void {
+    event?.preventDefault();
+    event?.stopPropagation();
+
+    void this.router.navigate(['/forgot-password']);
+  }
 }

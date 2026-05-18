@@ -1,4 +1,4 @@
-import { inject, Injectable, signal } from '@angular/core';
+import { computed, inject, Injectable, signal } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { catchError, finalize, Observable, of, tap } from 'rxjs';
 import { LoginRequest, LoginResponse, LoginService } from '../../services/login.service';
@@ -6,9 +6,9 @@ import { LoginRequest, LoginResponse, LoginService } from '../../services/login.
 type UserRole = 'USER' | 'ORGANIZER' | 'ADMIN';
 
 interface AuthSnapshot {
-  isAuthenticated: boolean;
   role: UserRole | null;
   email: string | null;
+  token: string;
 }
 
 const STORAGE_KEY = 'demo-app-auth';
@@ -19,7 +19,8 @@ export class LoginStore {
 
   readonly isSubmitting = signal(false);
   readonly errorMessage = signal<string | null>(null);
-  readonly isAuthenticated = signal(false);
+  readonly token = signal<string | null>(null);
+  readonly isAuthenticated = computed(() => this.token() !== null);
   readonly role = signal<UserRole | null>(null);
   readonly email = signal<string | null>(null);
 
@@ -47,8 +48,8 @@ export class LoginStore {
   }
 
   private applyResponse(response: LoginResponse, email: string | null): void {
-    if (response.success) {
-      this.isAuthenticated.set(true);
+    if (response.success && response.token) {
+      this.token.set(response.token);
       this.role.set((response.role as UserRole) ?? null);
       this.email.set(email);
       this.errorMessage.set(null);
@@ -67,6 +68,7 @@ export class LoginStore {
         return {
           success: maybeError.success,
           role: maybeError.role ?? null,
+          token: maybeError.token ?? null,
           errorMessage:
             maybeError.errorMessage ??
             (error.status === 401
@@ -79,6 +81,7 @@ export class LoginStore {
     return {
       success: false,
       role: null,
+      token: null,
       errorMessage: 'Unable to complete login. Please try again.',
     };
   }
@@ -93,29 +96,52 @@ export class LoginStore {
     try {
       const snapshot = JSON.parse(stored) as AuthSnapshot;
 
-      this.isAuthenticated.set(snapshot.isAuthenticated);
+      if (!snapshot.token) {
+        this.clearSession();
+        return;
+      }
+
+      this.token.set(snapshot.token);
       this.role.set(snapshot.role ?? null);
       this.email.set(snapshot.email ?? null);
+
+      sessionStorage.setItem('token', snapshot.token);
+      sessionStorage.setItem('role', snapshot.role ?? '');
+      sessionStorage.setItem('email', snapshot.email ?? '');
     } catch {
       this.clearSession();
     }
   }
 
   private persistAuthState(): void {
+    const token = this.token();
+
+    if (!token) {
+      return;
+    }
+
     const snapshot: AuthSnapshot = {
-      isAuthenticated: this.isAuthenticated(),
       role: this.role(),
       email: this.email(),
+      token,
     };
 
     sessionStorage.setItem(STORAGE_KEY, JSON.stringify(snapshot));
+
+    sessionStorage.setItem('token', token);
+    sessionStorage.setItem('role', this.role() ?? '');
+    sessionStorage.setItem('email', this.email() ?? '');
   }
 
   private clearSession(errorMessage: string | null = null): void {
-    this.isAuthenticated.set(false);
+    this.token.set(null);
     this.role.set(null);
     this.email.set(null);
     this.errorMessage.set(errorMessage);
+
     sessionStorage.removeItem(STORAGE_KEY);
+    sessionStorage.removeItem('token');
+    sessionStorage.removeItem('role');
+    sessionStorage.removeItem('email');
   }
 }

@@ -2,10 +2,22 @@
   <span class="toolbar-title">HikeAlong</span>
 
   @if (!isLoginPage()) {
-    <a mat-button routerLink="/admin/persons">People</a>
-    <a mat-button routerLink="/admin/events">Events</a>
-    <a mat-button routerLink="/admin/reservations">Reservations</a>
-    <a mat-button routerLink="/feed">Events</a>
+    @if (role() === 'ADMIN') {
+      <a mat-button routerLink="/admin/persons">Manage Users</a>
+      <a mat-button routerLink="/admin/events">Manage Events</a>
+      <a mat-button routerLink="/admin/reservations">Manage Reservations</a>
+    }
+
+    @if (role() === 'USER') {
+      <a mat-button routerLink="/feed">Events</a>
+    }
+
+    @if (role() === 'ORGANIZER') {
+      <a mat-button routerLink="/feed">Events</a>
+      <a mat-button routerLink="/organizer/my-events">My Events</a>
+      <a mat-button routerLink="/organizer/create-event">Create Event</a>
+    }
+
     <a mat-button routerLink="/profile">My Profile</a>
 
     <span class="toolbar-spacer"></span>

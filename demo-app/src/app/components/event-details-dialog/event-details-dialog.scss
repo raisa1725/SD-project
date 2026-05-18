@@ -1,0 +1,49 @@
+:host {
+  display: block;
+}
+
+.dialog-content {
+  min-width: 420px;
+  max-width: 560px;
+}
+
+.description {
+  margin: 0 0 20px;
+  line-height: 1.5;
+  color: #555;
+}
+
+.details-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.detail-card {
+  padding: 14px;
+  border-radius: 14px;
+  border: 1px solid #e5e5e5;
+  background: #fafafa;
+}
+
+.label {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 0.8rem;
+  color: #777;
+}
+
+.detail-card strong {
+  color: #222;
+  font-size: 0.95rem;
+}
+
+@media (max-width: 600px) {
+  .dialog-content {
+    min-width: auto;
+  }
+
+  .details-grid {
+    grid-template-columns: 1fr;
+  }
+}

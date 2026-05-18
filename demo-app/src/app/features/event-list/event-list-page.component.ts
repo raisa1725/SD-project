@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatButtonModule } from '@angular/material/button';
@@ -21,6 +21,7 @@ import { EventListStore } from './event-list.store';
 import { Router } from '@angular/router';
 import { LoginStore } from '../login/login.store';
 import { ReservationService } from '../../services/reservation.service';
+import { EventDetailsDialogComponent } from '../../components/event-details-dialog/event-details-dialog';
 
 @Component({
   selector: 'app-event-list-page',
@@ -115,6 +116,11 @@ export class EventListPageComponent implements OnInit {
   protected openCreateDialog(): void {
     if (this.isLoading()) return;
 
+    if (this.role() === 'ORGANIZER') {
+      void this.router.navigate(['/organizer/my-events']);
+      return;
+    }
+
     this.dialog
       .open<EventFormDialogComponent, EventFormDialogData, EventFormDialogResult>(
         EventFormDialogComponent,
@@ -203,6 +209,43 @@ export class EventListPageComponent implements OnInit {
       .subscribe((confirmed) => {
         if (!confirmed) return;
         this.store.remove(event.id);
+      });
+  }
+
+  protected readonly viewMode = signal<'grid' | 'list'>('grid');
+
+  protected readonly visibleEvents = computed(() => {
+    const role = this.role();
+    const email = this.loginStore.email();
+
+    if (role === 'ORGANIZER') {
+      return this.events().filter((event) => event.organizer.email !== email);
+    }
+
+    return this.events();
+  });
+
+  protected openDetails(event: Event): void {
+    const role = this.role();
+    const email = this.loginStore.email();
+
+    const canReserve =
+      role === 'USER' ||
+      (role === 'ORGANIZER' && event.organizer.email !== email);
+
+    this.dialog
+      .open<EventDetailsDialogComponent, { event: Event; canReserve: boolean }, 'reserve'>(
+        EventDetailsDialogComponent,
+        {
+          data: { event, canReserve },
+        }
+      )
+      .afterClosed()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((result) => {
+        if (result === 'reserve') {
+          this.makeReservation(event);
+        }
       });
   }
 }

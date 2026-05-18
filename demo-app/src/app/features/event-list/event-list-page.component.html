@@ -90,84 +90,43 @@
     [attr.aria-busy]="isLoading()"
     [class.is-busy]="isLoading()"
   >
-    <table mat-table [dataSource]="events()" aria-label="Events table">
-      <ng-container matColumnDef="title">
-        <th mat-header-cell *matHeaderCellDef scope="col">Title</th>
-        <td mat-cell *matCellDef="let event">{{ event.title }}</td>
-      </ng-container>
+    <section class="view-actions">
+      <button mat-button type="button" (click)="viewMode.set('grid')">
+        <mat-icon>grid_view</mat-icon>
+        Grid
+      </button>
 
-      <ng-container matColumnDef="location">
-        <th mat-header-cell *matHeaderCellDef scope="col">Location</th>
-        <td mat-cell *matCellDef="let event">{{ event.location }}</td>
-      </ng-container>
+      <button mat-button type="button" (click)="viewMode.set('list')">
+        <mat-icon>view_list</mat-icon>
+        List
+      </button>
+    </section>
 
-      <ng-container matColumnDef="date">
-        <th mat-header-cell *matHeaderCellDef scope="col">Date</th>
-        <td mat-cell *matCellDef="let event">
-          {{ event.date | date: 'dd/MM/yyyy HH:mm' }}
-        </td>
-      </ng-container>
+    <section [class.events-grid]="viewMode() === 'grid'" [class.events-list]="viewMode() === 'list'">
+      @for (event of visibleEvents(); track event.id) {
+        <article class="event-card" (click)="openDetails(event)">
+          <div>
+            <h2>{{ event.title }}</h2>
+            <p>{{ event.location }}</p>
+            <p>{{ event.date | date: 'dd/MM/yyyy HH:mm' }}</p>
+            <p>{{ event.maxParticipants }} seats</p>
+          </div>
 
-      <ng-container matColumnDef="maxParticipants">
-        <th mat-header-cell *matHeaderCellDef scope="col">Max Participants</th>
-        <td mat-cell *matCellDef="let event">{{ event.maxParticipants }}</td>
-      </ng-container>
+          @if (role() === 'ADMIN') {
+            <div class="card-actions" (click)="$event.stopPropagation()">
+              <button mat-icon-button type="button" (click)="openEditDialog(event)">
+                <mat-icon>edit</mat-icon>
+              </button>
 
-      <ng-container matColumnDef="organizer">
-        <th mat-header-cell *matHeaderCellDef scope="col">Organizer</th>
-        <td mat-cell *matCellDef="let event">{{ event.organizer.name }}</td>
-      </ng-container>
-
-      <ng-container matColumnDef="actions">
-        <th mat-header-cell *matHeaderCellDef scope="col">Actions</th>
-        <td mat-cell *matCellDef="let event">
-          @if (role() !== 'USER') {
-            <button
-              mat-icon-button
-              type="button"
-              (click)="openEditDialog(event)"
-              [attr.aria-label]="'Edit ' + event.title"
-              [disabled]="isLoading()"
-            >
-              <mat-icon>edit</mat-icon>
-            </button>
-
-            <button
-              mat-icon-button
-              type="button"
-              (click)="openDeleteDialog(event)"
-              [attr.aria-label]="'Delete ' + event.title"
-              class="delete-btn"
-              [disabled]="isLoading()"
-            >
-              <mat-icon>delete</mat-icon>
-            </button>
+              <button mat-icon-button type="button" class="delete-btn" (click)="openDeleteDialog(event)">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
           }
-        </td>
-      </ng-container>
-
-      <ng-container matColumnDef="reservation">
-        <th mat-header-cell *matHeaderCellDef scope="col">Reservation</th>
-        <td mat-cell *matCellDef="let event">
-          <button
-            mat-flat-button
-            type="button"
-            (click)="makeReservation(event)"
-            [disabled]="isLoading()"
-          >
-            Make Reservation
-          </button>
-        </td>
-      </ng-container>
-
-      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-      <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
-
-      <tr class="mat-mdc-row" *matNoDataRow>
-        <td [attr.colspan]="displayedColumns.length" class="no-data-cell">
-          No events found. Try changing the filters or add a new event.
-        </td>
-      </tr>
-    </table>
+        </article>
+      } @empty {
+        <p class="no-data-cell">No events found.</p>
+      }
+    </section>
   </div>
 </main>
