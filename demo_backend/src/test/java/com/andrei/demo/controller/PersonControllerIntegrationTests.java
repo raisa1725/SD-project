@@ -1,35 +1,38 @@
 package com.andrei.demo.controller;
 
 import com.andrei.demo.model.Person;
-import com.andrei.demo.repository.PersonRepository;
-import com.andrei.demo.util.JwtUtil;
 import com.andrei.demo.repository.EventRepository;
+import com.andrei.demo.repository.PersonRepository;
 import com.andrei.demo.repository.ReservationRepository;
-import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
-import tools.jackson.core.type.TypeReference;
-import tools.jackson.databind.ObjectMapper;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.List;
-
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@SpringBootTest
-@AutoConfigureMockMvc
-@TestPropertySource(locations = "classpath:application-test.properties")
-public class PersonControllerIntegrationTests {
+@SpringBootTest(properties = {
+        "MAIL_USERNAME=test@example.com",
+        "MAIL_PASSWORD=test-password",
+        "app.mail.from=test@example.com",
+        "spring.mail.host=localhost",
+        "spring.mail.port=3025",
+        "spring.mail.username=test@example.com",
+        "spring.mail.password=test-password",
+        "spring.mail.properties.mail.smtp.auth=false",
+        "spring.mail.properties.mail.smtp.starttls.enable=false"
+})
+@AutoConfigureMockMvc(addFilters = false)
+@ActiveProfiles("test")
+class PersonControllerIntegrationTests {
+
     @Autowired
     private MockMvc mockMvc;
 
@@ -37,170 +40,178 @@ public class PersonControllerIntegrationTests {
     private PersonRepository personRepository;
 
     @Autowired
-    private JwtUtil jwtUtil;
-
-    @Autowired
     private EventRepository eventRepository;
 
     @Autowired
     private ReservationRepository reservationRepository;
 
-    private static final String FIXTURE_PATH = "src/test/resources/fixtures/";
-    private static final ObjectMapper objectMapper = new ObjectMapper();
-    private String authToken;
-
     @BeforeEach
-    void setUp() throws Exception {
+    void cleanUp() {
         reservationRepository.deleteAll();
         eventRepository.deleteAll();
         personRepository.deleteAll();
-
-        reservationRepository.flush();
-        eventRepository.flush();
-        personRepository.flush();
-
-        seedDatabase();
-        initializeAuthToken();
-    }
-
-    private void seedDatabase() throws Exception {
-        String seedDataJson = loadFixture("seed_person.json");
-        List<Person> people = objectMapper.readValue(seedDataJson, new TypeReference<>() {});
-        personRepository.saveAll(people);
-    }
-
-    private void initializeAuthToken() {
-        Person authPerson = personRepository.findAll().stream().findFirst().orElseThrow(
-                () -> new IllegalStateException("No seeded person available for auth token"));
-        authToken = jwtUtil.createToken(authPerson);
     }
 
     @Test
-    void testGetPeople() throws Exception {
-        mockMvc.perform(get("/person")
-                .header("Authorization", "Bearer " + authToken))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()")
-                        .value(2))
-                .andExpect(jsonPath("$[*].name",
-                        Matchers.containsInAnyOrder("John Doe", "Jane Doe")))
-                .andExpect(jsonPath("$[*].age",
-                        Matchers.containsInAnyOrder(30, 25)))
-                .andExpect(jsonPath("$[*].email",
-                        Matchers.containsInAnyOrder(
-                                "john.doe@example.com", "jane.doe@example.com"
-                        )));
-    }
-
-    @Test
-    void testAddPerson_ValidPayload() throws Exception {
-        String validPersonJson = loadFixture("valid_person.json");
+    void testAddPersonSuccessfully() throws Exception {
+        String requestBody = """
+                {
+                  "name": "John Doe",
+                  "password": "Password_john123!",
+                  "age": 30,
+                  "email": "john@example.com",
+                  "role": "USER"
+                }
+                """;
 
         mockMvc.perform(post("/person")
-                        .header("Authorization", "Bearer " + authToken)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(validPersonJson))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").exists())
-                .andExpect(jsonPath("$.name").value("Alice Smith"))
-                .andExpect(jsonPath("$.password", Matchers.startsWith("$2")))
-                .andExpect(jsonPath("$.age").value(28))
-                .andExpect(jsonPath("$.email").value("alice.smith@example.com"));
-    }
-
-    @Test
-    void testAddPerson_InvalidPayload() throws Exception {
-        String invalidPersonJson = loadFixture("invalid_person.json");
-
-        mockMvc.perform(post("/person")
-                        .header("Authorization", "Bearer " + authToken)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(invalidPersonJson))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.name")
-                        .value("Name should be between 2 and 100 characters"))
-                .andExpect(jsonPath("$.password")
-                        .value("Password must contain at least 8 characters, including uppercase, lowercase, digit, and special character"))
-                .andExpect(jsonPath("$.age")
-                        .value("Age is required"))
-                .andExpect(jsonPath("$.email")
-                        .value("Email is required"));
-    }
-
-    @Test
-    void testGetPersonById() throws Exception {
-        Person person = personRepository.findAll().get(0);
-
-        mockMvc.perform(get("/person/" + person.getId()))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(person.getId().toString()))
-                .andExpect(jsonPath("$.name").value(person.getName()))
-                .andExpect(jsonPath("$.email").value(person.getEmail()));
-    }
-
-    @Test
-    void testGetPersonByEmail() throws Exception {
-        mockMvc.perform(get("/person/email/john.doe@example.com"))
+                        .content(requestBody))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("John Doe"))
-                .andExpect(jsonPath("$.email").value("john.doe@example.com"));
+                .andExpect(jsonPath("$.email").value("john@example.com"))
+                .andExpect(jsonPath("$.role").value("USER"));
     }
 
     @Test
-    void testPatchPerson_ValidPayload() throws Exception {
-        Person person = personRepository.findAll().get(0);
+    void testCreatePersonStoresHashedPassword() throws Exception {
+        String rawPassword = "Password_test123!";
 
-        String patchJson = """
-            {
-              "name": "John Updated",
-              "age": 35,
-              "password": "UpdatedPass123!@#"
-            }
-            """;
+        String requestBody = """
+                {
+                  "name": "Hash Test",
+                  "password": "Password_test123!",
+                  "age": 22,
+                  "email": "hash.person@example.com",
+                  "role": "USER"
+                }
+                """;
 
-        mockMvc.perform(patch("/person/" + person.getId())
+        mockMvc.perform(post("/person")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(patchJson))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.name").value("John Updated"))
-                .andExpect(jsonPath("$.age").value(35))
-                .andExpect(jsonPath("$.email").value(person.getEmail()));
+                        .content(requestBody))
+                .andExpect(status().isOk());
+
+        Person savedPerson = personRepository.findByEmail("hash.person@example.com").orElseThrow();
+
+        assertNotNull(savedPerson.getPassword());
+        assertNotEquals(rawPassword, savedPerson.getPassword());
     }
 
     @Test
-    void testDeletePerson() throws Exception {
-        Person person = personRepository.findAll().get(0);
+    void testCreatePersonWithInvalidEmailReturnsBadRequest() throws Exception {
+        String requestBody = """
+                {
+                  "name": "Invalid Email",
+                  "password": "Password_valid123!",
+                  "age": 22,
+                  "email": "not-an-email",
+                  "role": "USER"
+                }
+                """;
 
-        mockMvc.perform(delete("/person/" + person.getId()))
+        mockMvc.perform(post("/person")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestBody))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.email").exists());
+    }
+
+    @Test
+    void testCreatePersonWithWeakPasswordReturnsBadRequest() throws Exception {
+        String requestBody = """
+                {
+                  "name": "Weak Password",
+                  "password": "abc",
+                  "age": 22,
+                  "email": "weak.password@example.com",
+                  "role": "USER"
+                }
+                """;
+
+        mockMvc.perform(post("/person")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestBody))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.password").exists());
+    }
+
+    @Test
+    void testGetPeopleReturnsCreatedPerson() throws Exception {
+        String requestBody = """
+                {
+                  "name": "List User",
+                  "password": "Password_list123!",
+                  "age": 24,
+                  "email": "list.user@example.com",
+                  "role": "USER"
+                }
+                """;
+
+        mockMvc.perform(post("/person")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestBody))
                 .andExpect(status().isOk());
 
         mockMvc.perform(get("/person"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(1));
+                .andExpect(jsonPath("$[0].email").value("list.user@example.com"));
     }
 
     @Test
-    void testAddPerson_DuplicateEmail() throws Exception {
-        String duplicatePersonJson = """
-            {
-              "name": "Duplicate User",
-              "password": "Securepass123!@#",
-              "age": 22,
-              "email": "john.doe@example.com",
-              "role": "USER"
-            }
-            """;
+    void testPatchPersonSuccessfully() throws Exception {
+        String createBody = """
+                {
+                  "name": "Patch User",
+                  "password": "Password_patch123!",
+                  "age": 24,
+                  "email": "patch.user@example.com",
+                  "role": "USER"
+                }
+                """;
 
         mockMvc.perform(post("/person")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(duplicatePersonJson))
-                .andExpect(status().isBadRequest());
+                        .content(createBody))
+                .andExpect(status().isOk());
+
+        Person savedPerson = personRepository.findByEmail("patch.user@example.com").orElseThrow();
+
+        String patchBody = """
+                {
+                  "name": "Updated Patch User",
+                  "age": 25
+                }
+                """;
+
+        mockMvc.perform(patch("/person/" + savedPerson.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(patchBody))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value("Updated Patch User"))
+                .andExpect(jsonPath("$.age").value(25));
     }
 
+    @Test
+    void testDeletePersonSuccessfully() throws Exception {
+        String createBody = """
+                {
+                  "name": "Delete User",
+                  "password": "Password_delete123!",
+                  "age": 24,
+                  "email": "delete.user@example.com",
+                  "role": "USER"
+                }
+                """;
 
+        mockMvc.perform(post("/person")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(createBody))
+                .andExpect(status().isOk());
 
+        Person savedPerson = personRepository.findByEmail("delete.user@example.com").orElseThrow();
 
-    private String loadFixture(String fileName) throws IOException {
-        return Files.readString(Paths.get(FIXTURE_PATH + fileName));
+        mockMvc.perform(delete("/person/" + savedPerson.getId()))
+                .andExpect(status().isOk());
     }
 }

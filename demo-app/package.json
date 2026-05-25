@@ -20,7 +20,9 @@
     "@angular/material": "^21",
     "@angular/platform-browser": "^21",
     "@angular/router": "^21",
+    "@stomp/stompjs": "^7.3.0",
     "rxjs": "~7.8.0",
+    "sockjs-client": "^1.6.1",
     "tslib": "^2.3.0"
   },
   "devDependencies": {
@@ -28,6 +30,7 @@
     "@angular/cli": "^21",
     "@angular/compiler-cli": "^21",
     "@eslint/js": "^10.0.1",
+    "@types/sockjs-client": "^1.5.4",
     "angular-eslint": "^21",
     "eslint": "^10.0.3",
     "jsdom": "^28.0.0",

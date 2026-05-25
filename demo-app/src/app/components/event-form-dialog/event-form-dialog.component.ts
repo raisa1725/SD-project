@@ -17,6 +17,7 @@ export interface EventFormDialogData {
   title: string;
   submitLabel?: string;
   organizers: Person[];
+  showOrganizerField?: boolean;
   initialValue?: Partial<CreateEventDto> | null;
 }
 
@@ -41,6 +42,7 @@ export class EventFormDialogComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly dialogRef = inject(MatDialogRef<EventFormDialogComponent>);
   protected readonly data = inject<EventFormDialogData>(MAT_DIALOG_DATA);
+  protected readonly showOrganizerField = this.data.showOrganizerField ?? true;
 
   protected readonly form = this.fb.nonNullable.group({
     title: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(100)]],

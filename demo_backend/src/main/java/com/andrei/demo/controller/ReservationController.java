@@ -50,4 +50,24 @@ public class ReservationController {
     public void deleteReservation(@PathVariable UUID uuid) {
         reservationService.deleteReservation(uuid);
     }
+
+    @GetMapping("/reservation/organizer/{organizerId}/pending")
+    public List<Reservation> getOrganizerPendingReservations(@PathVariable UUID organizerId) {
+        return reservationService.getOrganizerReservations(organizerId);
+    }
+
+    @GetMapping("/reservation/organizer/{organizerId}/all")
+    public List<Reservation> getOrganizerEventReservations(@PathVariable UUID organizerId) {
+        return reservationService.getOrganizerEventReservations(organizerId);
+    }
+
+    @PatchMapping("/reservation/{uuid}/accept")
+    public Reservation acceptReservation(@PathVariable UUID uuid) {
+        return reservationService.acceptReservation(uuid);
+    }
+
+    @PatchMapping("/reservation/{uuid}/decline")
+    public Reservation declineReservation(@PathVariable UUID uuid) {
+        return reservationService.declineReservation(uuid);
+    }
 }

@@ -10,9 +10,15 @@ import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/materia
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
+import { MatIconModule } from '@angular/material/icon';
+
 import { Person } from '../../models/person.model';
 import { Event } from '../../models/event.model';
-import { CreateReservationDto, ReservationStatus, UpdateReservationDto } from '../../models/reservation.model';
+import {
+  CreateReservationDto,
+  ReservationStatus,
+  UpdateReservationDto,
+} from '../../models/reservation.model';
 
 export interface ReservationFormDialogData {
   title: string;
@@ -20,6 +26,8 @@ export interface ReservationFormDialogData {
   persons: Person[];
   events: Event[];
   isEdit?: boolean;
+  canEditStatus?: boolean;
+  simpleUserEdit?: boolean;
   initialValue?: {
     personId?: string;
     eventId?: string;
@@ -28,7 +36,10 @@ export interface ReservationFormDialogData {
   } | null;
 }
 
-export type ReservationFormDialogResult = CreateReservationDto | UpdateReservationDto | undefined;
+export type ReservationFormDialogResult =
+  | CreateReservationDto
+  | UpdateReservationDto
+  | undefined;
 
 @Component({
   selector: 'app-reservation-form-dialog',
@@ -40,6 +51,7 @@ export type ReservationFormDialogResult = CreateReservationDto | UpdateReservati
     MatInputModule,
     MatButtonModule,
     MatSelectModule,
+    MatIconModule,
   ],
   templateUrl: './reservation-form-dialog.component.html',
   styleUrl: './reservation-form-dialog.component.scss',
@@ -51,6 +63,11 @@ export class ReservationFormDialogComponent implements OnInit {
   protected readonly data = inject<ReservationFormDialogData>(MAT_DIALOG_DATA);
 
   protected readonly statuses: ReservationStatus[] = ['PENDING', 'ACCEPTED', 'DECLINED'];
+  protected readonly canEditStatus = this.data.canEditStatus ?? true;
+  protected readonly simpleUserEdit = this.data.simpleUserEdit ?? false;
+
+  protected readonly eventName =
+    this.data.events[0]?.title ?? 'Selected event';
 
   protected readonly form = this.fb.nonNullable.group({
     personId: ['', [Validators.required]],
@@ -70,6 +87,21 @@ export class ReservationFormDialogComponent implements OnInit {
     }
   }
 
+  protected decreaseSpots(): void {
+    const currentValue = Number(this.form.controls.spotsReserved.value);
+
+    if (currentValue <= 1) {
+      return;
+    }
+
+    this.form.controls.spotsReserved.setValue(currentValue - 1);
+  }
+
+  protected increaseSpots(): void {
+    const currentValue = Number(this.form.controls.spotsReserved.value);
+    this.form.controls.spotsReserved.setValue(currentValue + 1);
+  }
+
   protected submit(): void {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
@@ -79,10 +111,21 @@ export class ReservationFormDialogComponent implements OnInit {
     const { personId, eventId, spotsReserved, status } = this.form.getRawValue();
 
     if (this.data.isEdit) {
-      this.dialogRef.close({ spotsReserved, status } as UpdateReservationDto);
-    } else {
-      this.dialogRef.close({ personId, eventId, spotsReserved } as CreateReservationDto);
+      const finalStatus: ReservationStatus = this.canEditStatus ? status : 'PENDING';
+
+      this.dialogRef.close({
+        spotsReserved,
+        status: finalStatus,
+      } as UpdateReservationDto);
+
+      return;
     }
+
+    this.dialogRef.close({
+      personId,
+      eventId,
+      spotsReserved,
+    } as CreateReservationDto);
   }
 
   protected cancel(): void {

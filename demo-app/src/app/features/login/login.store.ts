@@ -9,6 +9,7 @@ interface AuthSnapshot {
   role: UserRole | null;
   email: string | null;
   token: string;
+  personId: string | null;
 }
 
 const STORAGE_KEY = 'demo-app-auth';
@@ -23,6 +24,7 @@ export class LoginStore {
   readonly isAuthenticated = computed(() => this.token() !== null);
   readonly role = signal<UserRole | null>(null);
   readonly email = signal<string | null>(null);
+  readonly personId = signal<string | null>(null);
 
   constructor() {
     this.restoreAuthState();
@@ -52,6 +54,7 @@ export class LoginStore {
       this.token.set(response.token);
       this.role.set((response.role as UserRole) ?? null);
       this.email.set(email);
+      this.personId.set(response.personId);
       this.errorMessage.set(null);
       this.persistAuthState();
       return;
@@ -69,6 +72,7 @@ export class LoginStore {
           success: maybeError.success,
           role: maybeError.role ?? null,
           token: maybeError.token ?? null,
+          personId: maybeError.personId ?? null,
           errorMessage:
             maybeError.errorMessage ??
             (error.status === 401
@@ -82,6 +86,7 @@ export class LoginStore {
       success: false,
       role: null,
       token: null,
+      personId: null,
       errorMessage: 'Unable to complete login. Please try again.',
     };
   }
@@ -104,10 +109,12 @@ export class LoginStore {
       this.token.set(snapshot.token);
       this.role.set(snapshot.role ?? null);
       this.email.set(snapshot.email ?? null);
+      this.personId.set(snapshot.personId ?? null);
 
       sessionStorage.setItem('token', snapshot.token);
       sessionStorage.setItem('role', snapshot.role ?? '');
       sessionStorage.setItem('email', snapshot.email ?? '');
+      sessionStorage.setItem('personId', snapshot.personId ?? '');
     } catch {
       this.clearSession();
     }
@@ -124,6 +131,7 @@ export class LoginStore {
       role: this.role(),
       email: this.email(),
       token,
+      personId: this.personId(),
     };
 
     sessionStorage.setItem(STORAGE_KEY, JSON.stringify(snapshot));
@@ -131,17 +139,20 @@ export class LoginStore {
     sessionStorage.setItem('token', token);
     sessionStorage.setItem('role', this.role() ?? '');
     sessionStorage.setItem('email', this.email() ?? '');
+    sessionStorage.setItem('personId', this.personId() ?? '');
   }
 
   private clearSession(errorMessage: string | null = null): void {
     this.token.set(null);
     this.role.set(null);
     this.email.set(null);
+    this.personId.set(null);
     this.errorMessage.set(errorMessage);
 
     sessionStorage.removeItem(STORAGE_KEY);
     sessionStorage.removeItem('token');
     sessionStorage.removeItem('role');
     sessionStorage.removeItem('email');
+    sessionStorage.removeItem('personId');
   }
 }

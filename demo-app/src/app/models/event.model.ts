@@ -10,6 +10,8 @@ export interface Event {
   organizer: Person;
 }
 
+
+
 export type CreateEventDto = {
   title: string;
   description?: string;

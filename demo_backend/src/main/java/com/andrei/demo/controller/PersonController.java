@@ -77,4 +77,14 @@ public class PersonController {
     public void deletePerson(@PathVariable UUID uuid) {
         personService.deletePerson(uuid);
     }
+
+    @PatchMapping("/person/{uuid}/accept-role-request")
+    public Person acceptRoleRequest(@PathVariable UUID uuid) {
+        return personService.acceptRoleRequest(uuid);
+    }
+
+    @PatchMapping("/person/{uuid}/decline-role-request")
+    public Person declineRoleRequest(@PathVariable UUID uuid) {
+        return personService.declineRoleRequest(uuid);
+    }
 }

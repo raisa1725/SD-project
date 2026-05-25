@@ -13,6 +13,7 @@ import com.andrei.demo.repository.PersonRepository;
 import com.andrei.demo.repository.ReservationRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -25,6 +26,7 @@ public class ReservationService {
     private final ReservationRepository reservationRepository;
     private final PersonRepository personRepository;
     private final EventRepository eventRepository;
+    private final ReservationNotificationService reservationNotificationService;
 
     public List<Reservation> getReservations() {
         return reservationRepository.findAll();
@@ -79,14 +81,12 @@ public class ReservationService {
         return reservationRepository.save(reservation);
     }
 
+    @Transactional
     public Reservation updateReservation(UUID uuid, Reservation reservation) {
-        Optional<Reservation> reservationOptional = reservationRepository.findById(uuid);
+        Reservation existingReservation = reservationRepository.findById(uuid)
+                .orElseThrow(() -> new ValidationException("Reservation with id " + uuid + " not found"));
 
-        if (reservationOptional.isEmpty()) {
-            throw new ValidationException("Reservation with id " + uuid + " not found");
-        }
-
-        Reservation existingReservation = reservationOptional.get();
+        ReservationStatus oldStatus = existingReservation.getStatus();
 
         if (reservation.getStatus() != null) {
             existingReservation.setStatus(reservation.getStatus());
@@ -109,46 +109,93 @@ public class ReservationService {
             existingReservation.setSpotsReserved(reservation.getSpotsReserved());
         }
 
-        return reservationRepository.save(existingReservation);
+        Reservation savedReservation = reservationRepository.save(existingReservation);
+        notifyUserIfStatusChanged(oldStatus, savedReservation);
+
+        return savedReservation;
     }
 
+    @Transactional
     public Reservation patchReservation(UUID uuid, ReservationUpdateDTO dto) {
-        Reservation existingReservation = reservationRepository.findById(uuid)
-                .orElseThrow(() -> new ValidationException("Reservation with id " + uuid + " not found"));
+        Reservation reservation = reservationRepository.findById(uuid)
+                .orElseThrow(() -> new ValidationException("Reservation not found"));
+
+        ReservationStatus oldStatus = reservation.getStatus();
+
+        if (dto.getSpotsReserved() != null) {
+            reservation.setSpotsReserved(dto.getSpotsReserved());
+        }
 
         if (dto.getStatus() != null) {
-            existingReservation.setStatus(dto.getStatus());
+            reservation.setStatus(dto.getStatus());
         }
 
-        if (dto.getSpotsReserved() != null && dto.getSpotsReserved() > 0) {
-            int alreadyReservedSpots = reservationRepository.findByEventId(existingReservation.getEvent().getId())
-                    .stream()
-                    .filter(r -> !r.getId().equals(existingReservation.getId()))
-                    .filter(r -> r.getStatus() != ReservationStatus.DECLINED)
-                    .mapToInt(Reservation::getSpotsReserved)
-                    .sum();
+        Reservation savedReservation = reservationRepository.save(reservation);
+        notifyUserIfStatusChanged(oldStatus, savedReservation);
 
-            int remainingSpots = existingReservation.getEvent().getMaxParticipants() - alreadyReservedSpots;
-
-            if (dto.getSpotsReserved() > remainingSpots) {
-                throw new ValidationException("Not enough available spots. Only " + remainingSpots + " spots left");
-            }
-
-            existingReservation.setSpotsReserved(dto.getSpotsReserved());
-        }
-
-        return reservationRepository.save(existingReservation);
+        return savedReservation;
     }
 
     public void deleteReservation(UUID uuid) {
         if (!reservationRepository.existsById(uuid)) {
             throw new ValidationException("Reservation with id " + uuid + " not found");
         }
+
         reservationRepository.deleteById(uuid);
     }
 
     public Reservation getReservationById(UUID uuid) {
-        return reservationRepository.findById(uuid).orElseThrow(
-                () -> new ValidationException("Reservation with id " + uuid + " not found"));
+        return reservationRepository.findById(uuid)
+                .orElseThrow(() -> new ValidationException("Reservation with id " + uuid + " not found"));
     }
+
+    public List<Reservation> getOrganizerReservations(UUID organizerId) {
+        return reservationRepository.findByEventOrganizerIdAndStatus(
+                organizerId,
+                ReservationStatus.PENDING
+        );
+    }
+
+    public List<Reservation> getOrganizerEventReservations(UUID organizerId) {
+        return reservationRepository.findByEventOrganizerId(organizerId);
+    }
+
+    @Transactional
+    public Reservation acceptReservation(UUID reservationId) {
+        Reservation reservation = getReservationById(reservationId);
+        ReservationStatus oldStatus = reservation.getStatus();
+
+        reservation.setStatus(ReservationStatus.ACCEPTED);
+
+        Reservation savedReservation = reservationRepository.save(reservation);
+        notifyUserIfStatusChanged(oldStatus, savedReservation);
+
+        return savedReservation;
+    }
+
+    @Transactional
+    public Reservation declineReservation(UUID reservationId) {
+        Reservation reservation = getReservationById(reservationId);
+        ReservationStatus oldStatus = reservation.getStatus();
+
+        reservation.setStatus(ReservationStatus.DECLINED);
+
+        Reservation savedReservation = reservationRepository.save(reservation);
+        notifyUserIfStatusChanged(oldStatus, savedReservation);
+
+        return savedReservation;
+    }
+
+    private void notifyUserIfStatusChanged(ReservationStatus oldStatus, Reservation reservation) {
+        if (oldStatus == reservation.getStatus()) {
+            return;
+        }
+
+        if (reservation.getStatus() == ReservationStatus.ACCEPTED ||
+                reservation.getStatus() == ReservationStatus.DECLINED) {
+            reservationNotificationService.notifyUserReservationUpdated(reservation);
+        }
+    }
+
+
 }

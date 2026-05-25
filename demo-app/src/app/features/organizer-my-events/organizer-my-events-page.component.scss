@@ -1,0 +1,132 @@
+.content {
+  padding: 32px;
+  color: var(--app-text);
+}
+
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.page-title {
+  margin: 0;
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--app-text);
+}
+
+.page-subtitle {
+  margin: 6px 0 0;
+  color: var(--app-muted-text);
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.view-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.events-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 16px;
+}
+
+.events-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.event-card {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 20px;
+  border-radius: 18px;
+  background: var(--app-surface);
+  color: var(--app-text);
+  border: 1px solid var(--app-border);
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+}
+
+.event-card:hover {
+  transform: translateY(-2px);
+  background: var(--app-surface-soft);
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.16);
+}
+
+.event-info h2 {
+  margin: 0 0 8px;
+  font-size: 20px;
+  color: var(--app-text);
+}
+
+.event-info p {
+  margin: 4px 0;
+  color: var(--app-muted-text);
+}
+
+.card-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.edit-btn {
+  color: var(--primary-btn-bg);
+}
+
+.edit-btn:hover {
+  background-color: rgba(25, 118, 210, 0.12);
+}
+
+.delete-btn {
+  color: var(--danger);
+}
+
+.delete-btn:hover {
+  background-color: rgba(220, 38, 38, 0.12);
+}
+
+.loading-status,
+.no-data-cell {
+  margin-top: 24px;
+  color: var(--app-muted-text);
+}
+
+.error-alert {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  color: var(--danger);
+  background: rgba(220, 38, 38, 0.12);
+  border: 1px solid var(--danger);
+}
+
+button[mat-icon-button],
+button[mat-button] {
+  color: var(--app-text);
+}
+
+button[mat-raised-button],
+button[mat-flat-button] {
+  background: var(--primary-btn-bg);
+  color: var(--primary-btn-text);
+}

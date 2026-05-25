@@ -29,4 +29,8 @@ public class Person {
     @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false)
     private PersonRole role;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "requested_role")
+    private PersonRole requestedRole;
 }

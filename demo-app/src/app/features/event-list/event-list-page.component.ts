@@ -14,6 +14,11 @@ import {
   EventFormDialogData,
   EventFormDialogResult,
 } from '../../components/event-form-dialog/event-form-dialog.component';
+import {
+  MakeReservationDialogComponent,
+  MakeReservationDialogData,
+  MakeReservationDialogResult,
+} from '../../components/make-reservation-dialog/make-reservation-dialog.component';
 import { Event } from '../../models/event.model';
 import { Person } from '../../models/person.model';
 import { PersonService } from '../../services/person.service';
@@ -54,7 +59,7 @@ export class EventListPageComponent implements OnInit {
   protected readonly searchTitle = signal('');
   protected readonly searchLocation = signal('');
   protected readonly upcomingOnly = signal(false);
-  private readonly loginStore = inject(LoginStore);
+  protected readonly loginStore = inject(LoginStore);
   private readonly router = inject(Router);
   protected readonly role = this.loginStore.role;
 
@@ -140,25 +145,72 @@ export class EventListPageComponent implements OnInit {
       });
   }
 
-  protected makeReservation(event: Event): void {
+  protected makeReservation(event: Event, spotsReserved: number): void {
     const email = this.loginStore.email();
 
     if (!email) {
+      alert('You must be logged in to make a reservation.');
       return;
     }
 
     this.personService
       .getByEmail(email)
       .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe((person) => {
-        this.reservationService
-          .create({
-            personId: person.id,
-            eventId: event.id,
-            spotsReserved: 1,
-          })
-          .pipe(takeUntilDestroyed(this.destroyRef))
-          .subscribe();
+      .subscribe({
+        next: (person) => {
+          this.reservationService
+            .create({
+              personId: person.id,
+              eventId: event.id,
+              spotsReserved,
+            })
+            .pipe(takeUntilDestroyed(this.destroyRef))
+            .subscribe({
+              next: () => {
+                alert('Reservation created successfully!');
+              },
+              error: (error) => {
+                console.error(error);
+
+                const message =
+                  error?.error?.error ||
+                  error?.error?.message ||
+                  error?.error?.spotsReserved ||
+                  'Could not create reservation.';
+
+                alert(message);
+              },
+            });
+        },
+        error: (error) => {
+          console.error(error);
+          alert('Could not find the logged in user.');
+        },
+      });
+  }
+
+  protected openReservationDialog(event: Event): void {
+    this.dialog
+      .open<
+        MakeReservationDialogComponent,
+        MakeReservationDialogData,
+        MakeReservationDialogResult
+      >(MakeReservationDialogComponent, {
+        width: '420px',
+        minHeight: '330px',
+        data: {
+          eventTitle: event.title,
+          maxSpots: event.maxParticipants,
+        },
+      })
+      .afterClosed()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((spotsReserved) => {
+        if (!spotsReserved) {
+          return;
+        }
+
+        this.makeReservation(event, spotsReserved);
       });
   }
 
@@ -244,7 +296,7 @@ export class EventListPageComponent implements OnInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((result) => {
         if (result === 'reserve') {
-          this.makeReservation(event);
+          this.openReservationDialog(event);
         }
       });
   }

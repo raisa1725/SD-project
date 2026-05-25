@@ -1,0 +1,51 @@
+<h2 mat-dialog-title>Make Reservation</h2>
+
+<mat-dialog-content>
+  <section class="simple-reservation-box">
+    <p class="event-label">Event</p>
+
+    <h3 class="event-name">
+      {{ data.eventTitle }}
+    </h3>
+
+    <p class="spots-label">Spots Reserved</p>
+
+    <div class="spots-control">
+      <button
+        mat-mini-fab
+        type="button"
+        (click)="decreaseSpots()"
+        [disabled]="form.controls.spotsReserved.value <= 1"
+      >
+        <mat-icon>remove</mat-icon>
+      </button>
+
+      <span class="spots-value">
+        {{ form.controls.spotsReserved.value }}
+      </span>
+
+      <button
+        mat-mini-fab
+        type="button"
+        (click)="increaseSpots()"
+        [disabled]="form.controls.spotsReserved.value >= data.maxSpots"
+      >
+        <mat-icon>add</mat-icon>
+      </button>
+    </div>
+
+    <p class="spots-helper">
+      Maximum {{ data.maxSpots }} spots
+    </p>
+  </section>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button type="button" (click)="cancel()">
+    Cancel
+  </button>
+
+  <button mat-flat-button type="button" (click)="submit()">
+    Reserve
+  </button>
+</mat-dialog-actions>

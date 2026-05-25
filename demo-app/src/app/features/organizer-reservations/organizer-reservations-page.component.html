@@ -1,0 +1,63 @@
+<div class="organizer-reservations-page">
+  <h1 class="page-title">Reservations</h1>
+
+  <section class="section-card">
+    <h2>Pending reservations</h2>
+
+    @if (pendingReservations().length === 0) {
+      <p class="empty-message">No pending reservations.</p>
+    }
+
+    @for (reservation of pendingReservations(); track reservation.id) {
+      <div class="reservation-card">
+        <div class="reservation-info">
+          <h3>{{ reservation.event.title }}</h3>
+
+          <p><strong>User:</strong> {{ reservation.person.name }}</p>
+          <p><strong>Email:</strong> {{ reservation.person.email }}</p>
+          <p><strong>Spots reserved:</strong> {{ reservation.spotsReserved }}</p>
+          <p><strong>Status:</strong> {{ reservation.status }}</p>
+        </div>
+
+        <div class="reservation-actions">
+          <button class="accept-button" type="button" (click)="acceptReservation(reservation.id)">
+            Accept
+          </button>
+
+          <button class="decline-button" type="button" (click)="declineReservation(reservation.id)">
+            Decline
+          </button>
+        </div>
+      </div>
+    }
+  </section>
+
+  <section class="section-card">
+    <h2>Reservations by event</h2>
+
+    @if (groupedReservations().length === 0) {
+      <p class="empty-message">No reservations found for your events.</p>
+    }
+
+    <mat-accordion>
+      @for (group of groupedReservations(); track group.eventId) {
+        <mat-expansion-panel>
+          <mat-expansion-panel-header>
+            <mat-panel-title>
+              {{ group.eventTitle }}
+            </mat-panel-title>
+          </mat-expansion-panel-header>
+
+          @for (reservation of group.reservations; track reservation.id) {
+            <div class="event-reservation">
+              <p><strong>User:</strong> {{ reservation.person.name }}</p>
+              <p><strong>Email:</strong> {{ reservation.person.email }}</p>
+              <p><strong>Spots:</strong> {{ reservation.spotsReserved }}</p>
+              <p><strong>Status:</strong> {{ reservation.status }}</p>
+            </div>
+          }
+        </mat-expansion-panel>
+      }
+    </mat-accordion>
+  </section>
+</div>

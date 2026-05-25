@@ -1,0 +1,105 @@
+.organizer-reservations-page {
+  padding: 32px;
+  background-color: var(--app-bg);
+  color: var(--app-text);
+  min-height: calc(100vh - 64px);
+}
+
+h1 {
+  margin: 0 0 24px;
+  font-size: 34px;
+  font-weight: 800;
+  color: var(--app-text);
+}
+
+.section-card {
+  margin-bottom: 28px;
+  padding: 28px;
+  border-radius: 18px;
+  background: var(--app-surface);
+  color: var(--app-text);
+  border: 1px solid var(--app-border);
+  box-shadow: 0 4px 18px rgba(15, 23, 42, 0.12);
+}
+
+h2 {
+  margin: 0 0 14px;
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--app-text);
+}
+
+.empty-message {
+  margin: 0;
+  color: var(--app-muted-text);
+}
+
+.reservation-card {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  margin-top: 18px;
+  padding: 18px;
+  border: 1px solid var(--app-border);
+  border-radius: 14px;
+  background: var(--app-surface-soft);
+  color: var(--app-text);
+}
+
+.reservation-info h3 {
+  margin: 0 0 12px;
+  font-size: 20px;
+  color: var(--app-text);
+}
+
+.reservation-info p,
+.event-reservation p {
+  margin: 6px 0;
+  color: var(--app-muted-text);
+}
+
+.reservation-info strong,
+.event-reservation strong {
+  color: var(--app-text);
+}
+
+.reservation-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+button {
+  border: none;
+  border-radius: 8px;
+  padding: 10px 18px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.accept-button {
+  background-color: #2e7d32;
+  color: white;
+}
+
+.accept-button:hover {
+  background-color: #256428;
+}
+
+.decline-button {
+  background-color: var(--danger);
+  color: white;
+}
+
+.decline-button:hover {
+  background-color: #b91c1c;
+}
+
+.event-reservation {
+  margin-top: 12px;
+  padding: 14px;
+  border: 1px solid var(--app-border);
+  border-radius: 12px;
+  background-color: var(--app-surface-soft);
+  color: var(--app-text);
+}

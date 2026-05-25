@@ -28,6 +28,10 @@ public interface ReservationRepository extends JpaRepository<Reservation, UUID> 
 
     List<Reservation> findByStatus(ReservationStatus status);
 
+    List<Reservation> findByEventOrganizerId(UUID organizerId);
+
+    List<Reservation> findByEventOrganizerIdAndStatus(UUID organizerId, ReservationStatus status);
+
     // find reservations for a given person email
     @Query("SELECT r FROM Reservation r WHERE r.person.email = ?1")
     List<Reservation> findByPersonEmail(String email);
@@ -35,4 +39,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, UUID> 
     // find reservations for a given event title
     @Query("SELECT r FROM Reservation r WHERE r.event.title = ?1")
     List<Reservation> findByEventTitle(String title);
+
+    void deleteByEvent_Id(UUID eventId);
 }

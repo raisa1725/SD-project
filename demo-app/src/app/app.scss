@@ -1,19 +1,51 @@
-:host ::ng-deep mat-toolbar.main-toolbar {
-  background-color: #1976d2 !important;
-  color: #ffffff !important;
-}
-
-:host ::ng-deep mat-toolbar.main-toolbar a,
-:host ::ng-deep mat-toolbar.main-toolbar button,
-:host ::ng-deep mat-toolbar.main-toolbar mat-icon {
-  color: #ffffff !important;
+.main-toolbar {
+  background: var(--toolbar-bg);
+  color: var(--toolbar-text);
+  transition: background 0.25s ease, color 0.25s ease;
 }
 
 .toolbar-title {
-  font-weight: 700;
-  margin-right: 24px;
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--toolbar-text);
+  margin-right: 28px;
+}
+
+.main-toolbar a,
+.main-toolbar button,
+.main-toolbar mat-icon {
+  color: var(--toolbar-text);
+  font-weight: 600;
+}
+
+.main-toolbar a {
+  border-radius: 999px;
+  transition: background 0.2s ease;
+}
+
+.main-toolbar a:hover {
+  background: rgba(255, 255, 255, 0.16);
 }
 
 .toolbar-spacer {
   flex: 1 1 auto;
+}
+
+.theme-toggle-btn {
+  min-width: 54px;
+  height: 46px;
+  border-radius: 999px;
+  margin-right: 14px;
+  background: var(--theme-button-bg);
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.theme-toggle-btn:hover {
+  background: var(--theme-button-hover);
+  transform: translateY(-1px);
+}
+
+.theme-emoji {
+  font-size: 21px;
+  line-height: 1;
 }

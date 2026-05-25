@@ -2,6 +2,7 @@
   max-width: 1100px;
   margin: 32px auto;
   padding: 0 16px;
+  color: var(--app-text);
 }
 
 .page-header {
@@ -17,11 +18,12 @@
   margin: 0 0 4px;
   font-size: 1.5rem;
   font-weight: 600;
+  color: var(--app-text);
 }
 
 .page-subtitle {
   margin: 0;
-  color: #555;
+  color: var(--app-muted-text);
 }
 
 .error-alert {
@@ -30,26 +32,30 @@
   gap: 8px;
   padding: 12px 16px;
   margin-bottom: 20px;
-  background-color: #fdecea;
-  border: 1px solid #f44336;
-  border-radius: 4px;
-  color: #b71c1c;
+  background-color: rgba(220, 38, 38, 0.12);
+  border: 1px solid var(--danger);
+  border-radius: 12px;
+  color: var(--danger);
   font-weight: 500;
 }
 
 .loading-status {
   margin: 0 0 12px;
-  color: #0d47a1;
+  color: var(--primary-btn-bg);
   font-weight: 500;
 }
 
 .table-container {
-  border: 1px solid #e0e0e0;
-  border-radius: 4px;
+  border: 1px solid var(--app-border);
+  border-radius: 16px;
   overflow: auto;
+  background: var(--app-surface);
+  color: var(--app-text);
 
   table {
     width: 100%;
+    background: var(--table-bg);
+    color: var(--app-text);
   }
 
   &.is-busy {
@@ -60,11 +66,11 @@
 .no-data-cell {
   padding: 24px;
   text-align: center;
-  color: #666;
+  color: var(--app-muted-text);
 }
 
 .delete-btn {
-  color: #c62828;
+  color: var(--danger);
 }
 
 .view-actions {
@@ -91,25 +97,28 @@
   justify-content: space-between;
   gap: 16px;
   padding: 18px;
-  border: 1px solid #e0e0e0;
+  border: 1px solid var(--app-border);
   border-radius: 16px;
-  background: white;
   cursor: pointer;
+  background: var(--app-surface);
+  color: var(--app-text);
   transition: 0.2s ease;
 
   &:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    background: var(--app-surface-soft);
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
   }
 
   h2 {
     margin: 0 0 8px;
     font-size: 1.1rem;
+    color: var(--app-text);
   }
 
   p {
     margin: 4px 0;
-    color: #555;
+    color: var(--app-muted-text);
   }
 }
 
@@ -117,4 +126,177 @@
   display: flex;
   align-items: flex-start;
   gap: 4px;
+}
+
+button[mat-icon-button],
+button[mat-button] {
+  color: var(--app-text);
+}
+
+button[mat-raised-button],
+button[mat-flat-button] {
+  background: var(--primary-btn-bg);
+  color: var(--primary-btn-text);
+}
+
+/* ================= EVENTS SEARCH / FILTER BAR ================= */
+
+.filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: nowrap;
+  margin: 18px 0 24px;
+  padding: 0;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  overflow: visible !important;
+  white-space: nowrap;
+}
+
+/* Form fields size */
+.filter-bar mat-form-field {
+  width: 245px;
+  min-width: 245px;
+  margin: 0;
+}
+
+/* Remove Material extra bottom space */
+.filter-bar ::ng-deep .mat-mdc-form-field-subscript-wrapper {
+  display: none !important;
+}
+
+/* Remove Material background rectangle */
+.filter-bar ::ng-deep .mat-mdc-text-field-wrapper,
+.filter-bar ::ng-deep .mdc-text-field,
+.filter-bar ::ng-deep .mdc-text-field--outlined {
+  height: 44px !important;
+  border-radius: 999px !important;
+  background: transparent !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+  overflow: visible !important;
+}
+
+/* Center content inside input */
+.filter-bar ::ng-deep .mat-mdc-form-field-flex {
+  height: 44px !important;
+  align-items: center !important;
+}
+
+.filter-bar ::ng-deep .mat-mdc-form-field-infix {
+  min-height: 44px !important;
+  padding-top: 10px !important;
+  padding-bottom: 6px !important;
+}
+
+/* Oval outline */
+.filter-bar ::ng-deep .mdc-notched-outline {
+  height: 44px !important;
+  border-radius: 999px !important;
+}
+
+.filter-bar ::ng-deep .mdc-notched-outline__leading {
+  border-radius: 999px 0 0 999px !important;
+  border-color: var(--app-border) !important;
+  width: 22px !important;
+  background: transparent !important;
+}
+
+.filter-bar ::ng-deep .mdc-notched-outline__notch {
+  border-color: var(--app-border) !important;
+  background: transparent !important;
+}
+
+.filter-bar ::ng-deep .mdc-notched-outline__trailing {
+  border-radius: 0 999px 999px 0 !important;
+  border-color: var(--app-border) !important;
+  background: transparent !important;
+}
+
+/* Hover */
+.filter-bar ::ng-deep mat-form-field:hover .mdc-notched-outline__leading,
+.filter-bar ::ng-deep mat-form-field:hover .mdc-notched-outline__notch,
+.filter-bar ::ng-deep mat-form-field:hover .mdc-notched-outline__trailing {
+  border-color: var(--primary-btn-bg) !important;
+}
+
+/* Focus */
+.filter-bar ::ng-deep .mat-mdc-form-field.mat-focused .mdc-notched-outline__leading,
+.filter-bar ::ng-deep .mat-mdc-form-field.mat-focused .mdc-notched-outline__notch,
+.filter-bar ::ng-deep .mat-mdc-form-field.mat-focused .mdc-notched-outline__trailing {
+  border-color: var(--primary-btn-bg) !important;
+  border-width: 2px !important;
+}
+
+/* Input text */
+.filter-bar ::ng-deep input {
+  color: var(--app-text) !important;
+  font-size: 13px !important;
+  font-weight: 500;
+}
+
+.filter-bar ::ng-deep input::placeholder {
+  color: var(--app-muted-text) !important;
+  font-size: 13px !important;
+}
+
+/* Labels */
+.filter-bar ::ng-deep .mat-mdc-floating-label {
+  color: var(--app-muted-text) !important;
+  font-size: 13px !important;
+}
+
+.filter-bar ::ng-deep .mat-mdc-form-field.mat-focused .mat-mdc-floating-label {
+  color: var(--primary-btn-bg) !important;
+}
+
+/* Checkbox */
+.filter-bar mat-checkbox {
+  flex: 0 0 auto;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  color: var(--app-text);
+}
+
+.filter-bar ::ng-deep .mdc-label {
+  color: var(--app-text) !important;
+  font-size: 13px !important;
+  font-weight: 700;
+}
+
+.filter-bar ::ng-deep .mdc-checkbox {
+  transform: scale(0.85);
+}
+
+/* Buttons */
+.filter-bar button {
+  flex: 0 0 auto;
+  height: 44px;
+  min-height: 44px;
+  border-radius: 999px !important;
+  padding: 0 22px !important;
+  font-size: 13px !important;
+  font-weight: 800;
+}
+
+.filter-bar button[mat-flat-button] {
+  background: var(--primary-btn-bg) !important;
+  color: var(--primary-btn-text) !important;
+}
+
+.filter-bar button[mat-button] {
+  color: var(--primary-btn-bg) !important;
+  background: transparent !important;
+}
+
+/* Hide any scrollbar if browser tries to show one */
+.filter-bar::-webkit-scrollbar {
+  display: none;
+}
+
+.filter-bar {
+  scrollbar-width: none;
 }

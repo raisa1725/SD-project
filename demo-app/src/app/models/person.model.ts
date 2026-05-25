@@ -7,6 +7,7 @@ export interface Person {
   email: string;
   password: string;
   role: PersonRole;
+  requestedRole?: PersonRole | null;
 }
 
 export interface CreatePersonDto {
@@ -23,4 +24,5 @@ export interface UpdatePersonDto {
   email?: string;
   password?: string;
   role?: PersonRole;
+  requestedRole?: PersonRole | null;
 }

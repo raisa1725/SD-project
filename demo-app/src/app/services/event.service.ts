@@ -74,7 +74,7 @@ export class EventService {
 
   delete(id: string): Observable<void> {
     return this.http.delete<void>(`${API_URL}/${id}`, {
-      headers: this.getAuthHeaders()
+      headers: this.getAuthHeaders(),
     });
   }
 }

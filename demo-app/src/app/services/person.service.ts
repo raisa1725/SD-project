@@ -62,4 +62,16 @@ export class PersonService {
       headers: this.getAuthHeaders()
     });
   }
+
+  acceptRoleRequest(id: string): Observable<Person> {
+    return this.http.patch<Person>(`${API_URL}/${id}/accept-role-request`, {}, {
+      headers: this.getAuthHeaders()
+    });
+  }
+
+  declineRoleRequest(id: string): Observable<Person> {
+    return this.http.patch<Person>(`${API_URL}/${id}/decline-role-request`, {}, {
+      headers: this.getAuthHeaders()
+    });
+  }
 }

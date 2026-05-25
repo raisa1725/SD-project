@@ -1,53 +1,592 @@
-@use '@angular/material' as mat;
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/icon?family=Material+Icons');
 
-html {
-  height: 100%;
-  @include mat.theme(
-      (
-        color: (
-          primary: mat.$azure-palette,
-          tertiary: mat.$blue-palette,
-        ),
-        typography: Roboto,
-        density: 0,
-      )
-  );
+html,
+body,
+* {
+  font-family: 'Montserrat', sans-serif;
 }
 
+.mat-mdc-button,
+.mat-mdc-raised-button,
+.mat-mdc-flat-button,
+.mat-mdc-stroked-button,
+.mat-mdc-card,
+.mat-mdc-table,
+.mat-mdc-header-cell,
+.mat-mdc-cell,
+.mat-mdc-form-field,
+.mat-mdc-input-element,
+.mat-mdc-select,
+.mat-mdc-option,
+.mat-toolbar,
+button,
+input,
+textarea,
+select {
+  font-family: 'Montserrat', sans-serif !important;
+}
+
+:root {
+  --app-bg: #eef6ff;
+  --app-surface: #ffffff;
+  --app-surface-soft: #f4f9ff;
+  --app-surface-strong: #dbeafe;
+
+  --app-text: #0f172a;
+  --app-muted-text: #475569;
+  --app-border: #c7ddf5;
+
+  --toolbar-bg: #1976d2;
+  --toolbar-text: #ffffff;
+
+  --theme-button-bg: #bfdbfe;
+  --theme-button-hover: #93c5fd;
+
+  --primary-btn-bg: #0f67c6;
+  --primary-btn-hover: #0b5cb3;
+  --primary-btn-text: #ffffff;
+
+  --table-bg: #ffffff;
+  --table-header-bg: #f1f7ff;
+  --table-row-hover: #eaf4ff;
+
+  --chip-bg: #e0efff;
+  --chip-text: #0b2f66;
+
+  --danger: #dc2626;
+  --success-bg: #dcfce7;
+  --success-text: #166534;
+}
+
+body.light-theme {
+  --app-bg: #eef6ff;
+  --app-surface: #ffffff;
+  --app-surface-soft: #f4f9ff;
+  --app-surface-strong: #dbeafe;
+
+  --app-text: #0f172a;
+  --app-muted-text: #475569;
+  --app-border: #c7ddf5;
+
+  --toolbar-bg: #1976d2;
+  --toolbar-text: #ffffff;
+
+  --theme-button-bg: #bfdbfe;
+  --theme-button-hover: #93c5fd;
+
+  --primary-btn-bg: #0f67c6;
+  --primary-btn-hover: #0b5cb3;
+  --primary-btn-text: #ffffff;
+
+  --table-bg: #ffffff;
+  --table-header-bg: #f1f7ff;
+  --table-row-hover: #eaf4ff;
+
+  --chip-bg: #e0efff;
+  --chip-text: #0b2f66;
+
+  --danger: #dc2626;
+  --success-bg: #dcfce7;
+  --success-text: #166534;
+}
+
+body.dark-theme {
+  --app-bg: #071426;
+  --app-surface: #0f2238;
+  --app-surface-soft: #132b47;
+  --app-surface-strong: #18395d;
+
+  --app-text: #f8fafc;
+  --app-muted-text: #b8c7dc;
+  --app-border: #294d75;
+
+  --toolbar-bg: #08294d;
+  --toolbar-text: #ffffff;
+
+  --theme-button-bg: #173a5e;
+  --theme-button-hover: #22517f;
+
+  --primary-btn-bg: #38bdf8;
+  --primary-btn-hover: #0ea5e9;
+  --primary-btn-text: #071426;
+
+  --table-bg: #0f2238;
+  --table-header-bg: #132b47;
+  --table-row-hover: #18395d;
+
+  --chip-bg: #dbeafe;
+  --chip-text: #08294d;
+
+  --danger: #f87171;
+  --success-bg: #14532d;
+  --success-text: #bbf7d0;
+}
+
+html,
 body {
-  color-scheme: light;
-  background-color: var(--mat-sys-surface);
-  color: var(--mat-sys-on-surface);
-  font: var(--mat-sys-body-medium);
   margin: 0;
-  height: 100%;
+  min-height: 100%;
+  background: var(--app-bg) !important;
+  color: var(--app-text);
+  font-family: 'Montserrat', sans-serif;
+  transition: background 0.25s ease, color 0.25s ease;
 }
 
-/* ── Snackbar styles ── */
-.snack-success .mdc-snackbar__surface {
-  background-color: #2e7d32 !important;
+app-root {
+  display: block;
+  min-height: 100vh;
+  background: var(--app-bg) !important;
+  color: var(--app-text);
 }
 
-.snack-success .mdc-snackbar__label,
-.snack-success .mat-mdc-snack-bar-label {
-  color: #ffffff !important;
-  white-space: pre-line;
+.content {
+  min-height: calc(100vh - 64px);
+  padding: 32px;
+  box-sizing: border-box;
+  background: var(--app-bg) !important;
+  color: var(--app-text);
+  transition: background 0.25s ease, color 0.25s ease;
 }
 
-.snack-success .mat-mdc-button.mat-mdc-snack-bar-action {
-  color: #a5d6a7 !important;
+/* ================= TEXT COLOR FIXES ================= */
+
+body.light-theme,
+body.dark-theme {
+  color: var(--app-text) !important;
 }
 
-.snack-error .mdc-snackbar__surface {
-  background-color: #c62828 !important;
+/* General page text */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+span,
+label,
+strong,
+div {
+  color: inherit;
 }
 
-.snack-error .mdc-snackbar__label,
-.snack-error .mat-mdc-snack-bar-label {
-  color: #ffffff !important;
-  white-space: pre-line;
+/* Angular Material table text */
+.mat-mdc-table,
+.mat-mdc-table *,
+.mat-mdc-header-row,
+.mat-mdc-row,
+.mat-mdc-header-cell,
+.mat-mdc-cell,
+.mat-mdc-footer-cell {
+  color: var(--app-text) !important;
 }
 
-.snack-error .mat-mdc-button.mat-mdc-snack-bar-action {
-  color: #ef9a9a !important;
+/* Table background */
+.mat-mdc-table {
+  background: transparent !important;
+}
+
+.mat-mdc-header-row {
+  background: var(--table-header-bg) !important;
+}
+
+.mat-mdc-row {
+  background: transparent !important;
+}
+
+.mat-mdc-row:hover {
+  background: var(--table-row-hover) !important;
+}
+
+/* Muted table / secondary text */
+.page-subtitle,
+.subtitle,
+.description,
+.label,
+.muted-text {
+  color: var(--app-muted-text) !important;
+}
+
+/* Material buttons text */
+.mat-mdc-button,
+.mat-mdc-raised-button,
+.mat-mdc-flat-button,
+.mat-mdc-stroked-button {
+  color: inherit;
+}
+
+/* Material icons keep icon font, but use theme color */
+mat-icon,
+.mat-icon {
+  color: inherit;
+}
+
+/* ================= MATERIAL DIALOG THEME FIX ================= */
+
+body.light-theme .mat-mdc-dialog-surface,
+body.dark-theme .mat-mdc-dialog-surface {
+  background: var(--app-surface) !important;
+  color: var(--app-text) !important;
+  border-radius: 18px !important;
+  border: 1px solid var(--app-border);
+}
+
+body.light-theme .mat-mdc-dialog-container,
+body.dark-theme .mat-mdc-dialog-container {
+  color: var(--app-text) !important;
+}
+
+body.light-theme .mat-mdc-dialog-container *,
+body.dark-theme .mat-mdc-dialog-container * {
+  color: inherit;
+}
+
+body.light-theme .mat-mdc-dialog-title,
+body.dark-theme .mat-mdc-dialog-title {
+  color: var(--app-text) !important;
+  font-family: 'Montserrat', sans-serif !important;
+  font-weight: 700;
+}
+
+/* Inputs inside dialogs */
+body.light-theme .mat-mdc-dialog-container input,
+body.dark-theme .mat-mdc-dialog-container input,
+body.light-theme .mat-mdc-dialog-container textarea,
+body.dark-theme .mat-mdc-dialog-container textarea {
+  color: var(--app-text) !important;
+  caret-color: var(--primary-btn-bg) !important;
+}
+
+/* Form fields */
+body.light-theme .mat-mdc-dialog-container .mat-mdc-form-field,
+body.dark-theme .mat-mdc-dialog-container .mat-mdc-form-field {
+  color: var(--app-text) !important;
+}
+
+body.light-theme .mat-mdc-dialog-container .mdc-text-field,
+body.dark-theme .mat-mdc-dialog-container .mdc-text-field {
+  background: var(--app-surface) !important;
+}
+
+body.light-theme .mat-mdc-dialog-container .mdc-floating-label,
+body.dark-theme .mat-mdc-dialog-container .mdc-floating-label {
+  color: var(--app-muted-text) !important;
+}
+
+body.light-theme .mat-mdc-dialog-container .mat-mdc-select-value,
+body.dark-theme .mat-mdc-dialog-container .mat-mdc-select-value,
+body.light-theme .mat-mdc-dialog-container .mat-mdc-select-arrow,
+body.dark-theme .mat-mdc-dialog-container .mat-mdc-select-arrow {
+  color: var(--app-text) !important;
+}
+
+/* Dialog action buttons */
+body.light-theme .mat-mdc-dialog-actions button,
+body.dark-theme .mat-mdc-dialog-actions button {
+  color: var(--app-text) !important;
+}
+
+body.light-theme .mat-mdc-dialog-actions button[mat-flat-button],
+body.dark-theme .mat-mdc-dialog-actions button[mat-flat-button],
+body.light-theme .mat-mdc-dialog-actions button[mat-raised-button],
+body.dark-theme .mat-mdc-dialog-actions button[mat-raised-button] {
+  background: var(--primary-btn-bg) !important;
+  color: var(--primary-btn-text) !important;
+}
+
+/* Disabled buttons */
+body.light-theme .mat-mdc-dialog-actions button:disabled,
+body.dark-theme .mat-mdc-dialog-actions button:disabled {
+  opacity: 0.45;
+  color: var(--app-muted-text) !important;
+}
+
+
+/* ================= MATERIAL SELECT PANEL FIX ================= */
+
+body.light-theme .mat-mdc-select-panel,
+body.dark-theme .mat-mdc-select-panel {
+  background: var(--app-surface) !important;
+  color: var(--app-text) !important;
+}
+
+body.light-theme .mat-mdc-option,
+body.dark-theme .mat-mdc-option {
+  color: var(--app-text) !important;
+}
+
+body.light-theme .mat-mdc-option:hover,
+body.dark-theme .mat-mdc-option:hover {
+  background: var(--app-surface-soft) !important;
+}
+
+/* ================= GLOBAL DARK/LIGHT COMPONENT FIXES ================= */
+
+body.light-theme *,
+body.dark-theme * {
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+body.light-theme .mat-mdc-card,
+body.dark-theme .mat-mdc-card,
+body.light-theme mat-card,
+body.dark-theme mat-card {
+  background: var(--app-surface) !important;
+  color: var(--app-text) !important;
+  border: 1px solid var(--app-border);
+}
+
+body.light-theme .mat-mdc-card *,
+body.dark-theme .mat-mdc-card *,
+body.light-theme mat-card *,
+body.dark-theme mat-card * {
+  color: inherit;
+}
+
+body.light-theme .page,
+body.dark-theme .page,
+body.light-theme .page-container,
+body.dark-theme .page-container,
+body.light-theme .login-page,
+body.dark-theme .login-page,
+body.light-theme .form-page,
+body.dark-theme .form-page {
+  background: var(--app-bg) !important;
+  color: var(--app-text) !important;
+}
+
+body.light-theme .card,
+body.dark-theme .card,
+body.light-theme .panel,
+body.dark-theme .panel,
+body.light-theme .section-card,
+body.dark-theme .section-card,
+body.light-theme .login-card,
+body.dark-theme .login-card,
+body.light-theme .form-card,
+body.dark-theme .form-card {
+  background: var(--app-surface) !important;
+  color: var(--app-text) !important;
+  border: 1px solid var(--app-border);
+}
+
+/* Inputs */
+body.light-theme .mat-mdc-form-field,
+body.dark-theme .mat-mdc-form-field {
+  color: var(--app-text) !important;
+}
+
+body.light-theme .mdc-text-field,
+body.dark-theme .mdc-text-field {
+  background: var(--app-surface-soft) !important;
+}
+
+body.light-theme input,
+body.dark-theme input,
+body.light-theme textarea,
+body.dark-theme textarea,
+body.light-theme select,
+body.dark-theme select {
+  color: var(--app-text) !important;
+  caret-color: var(--primary-btn-bg) !important;
+}
+
+body.light-theme .mdc-floating-label,
+body.dark-theme .mdc-floating-label,
+body.light-theme .mat-mdc-form-field-hint,
+body.dark-theme .mat-mdc-form-field-hint {
+  color: var(--app-muted-text) !important;
+}
+
+/* Material outline borders */
+body.light-theme .mdc-notched-outline__leading,
+body.light-theme .mdc-notched-outline__notch,
+body.light-theme .mdc-notched-outline__trailing,
+body.dark-theme .mdc-notched-outline__leading,
+body.dark-theme .mdc-notched-outline__notch,
+body.dark-theme .mdc-notched-outline__trailing {
+  border-color: var(--app-border) !important;
+}
+
+/* Select dropdown overlay */
+body.light-theme .cdk-overlay-pane,
+body.dark-theme .cdk-overlay-pane {
+  color: var(--app-text) !important;
+}
+
+body.light-theme .mat-mdc-select-panel,
+body.dark-theme .mat-mdc-select-panel,
+body.light-theme .mat-mdc-autocomplete-panel,
+body.dark-theme .mat-mdc-autocomplete-panel {
+  background: var(--app-surface) !important;
+  color: var(--app-text) !important;
+  border: 1px solid var(--app-border);
+}
+
+/* Tables */
+body.light-theme .mat-mdc-table,
+body.dark-theme .mat-mdc-table {
+  background: var(--table-bg) !important;
+  color: var(--app-text) !important;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+body.light-theme .mat-mdc-header-row,
+body.dark-theme .mat-mdc-header-row {
+  background: var(--table-header-bg) !important;
+}
+
+body.light-theme .mat-mdc-row,
+body.dark-theme .mat-mdc-row {
+  background: var(--table-bg) !important;
+}
+
+body.light-theme .mat-mdc-row:hover,
+body.dark-theme .mat-mdc-row:hover {
+  background: var(--table-row-hover) !important;
+}
+
+/* Buttons */
+body.light-theme button[mat-flat-button],
+body.dark-theme button[mat-flat-button],
+body.light-theme button[mat-raised-button],
+body.dark-theme button[mat-raised-button] {
+  background: var(--primary-btn-bg) !important;
+  color: var(--primary-btn-text) !important;
+}
+
+body.light-theme button[mat-stroked-button],
+body.dark-theme button[mat-stroked-button] {
+  color: var(--app-text) !important;
+  border-color: var(--app-border) !important;
+}
+
+/* Dialogs */
+body.light-theme .mat-mdc-dialog-surface,
+body.dark-theme .mat-mdc-dialog-surface {
+  background: var(--app-surface) !important;
+  color: var(--app-text) !important;
+  border: 1px solid var(--app-border);
+}
+
+body.light-theme .mat-mdc-dialog-surface *,
+body.dark-theme .mat-mdc-dialog-surface * {
+  color: inherit;
+}
+
+/* Text that often stays black */
+body.light-theme .title,
+body.dark-theme .title,
+body.light-theme .page-title,
+body.dark-theme .page-title,
+body.light-theme .card-title,
+body.dark-theme .card-title {
+  color: var(--app-text) !important;
+}
+
+body.light-theme .subtitle,
+body.dark-theme .subtitle,
+body.light-theme .page-subtitle,
+body.dark-theme .page-subtitle,
+body.light-theme .description,
+body.dark-theme .description,
+body.light-theme .muted,
+body.dark-theme .muted,
+body.light-theme .muted-text,
+body.dark-theme .muted-text {
+  color: var(--app-muted-text) !important;
+}
+
+
+/* ================= ROUNDED MATERIAL BUTTONS ================= */
+
+button[mat-raised-button],
+button[mat-flat-button],
+button[mat-stroked-button],
+button[mat-button],
+a[mat-raised-button],
+a[mat-flat-button],
+a[mat-stroked-button],
+a[mat-button],
+.mat-mdc-raised-button,
+.mat-mdc-unelevated-button,
+.mat-mdc-outlined-button,
+.mat-mdc-button {
+  border-radius: 999px !important;
+  min-height: 42px;
+  padding: 0 20px !important;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+/* Primary action buttons */
+button[mat-raised-button],
+button[mat-flat-button],
+.mat-mdc-raised-button,
+.mat-mdc-unelevated-button {
+  background: var(--primary-btn-bg) !important;
+  color: var(--primary-btn-text) !important;
+}
+
+/* Text / simple buttons */
+button[mat-button],
+a[mat-button],
+.mat-mdc-button {
+  color: var(--primary-btn-bg) !important;
+}
+
+/* Outlined buttons */
+button[mat-stroked-button],
+a[mat-stroked-button],
+.mat-mdc-outlined-button {
+  color: var(--primary-btn-bg) !important;
+  border-color: var(--primary-btn-bg) !important;
+}
+
+/* Icons inside buttons */
+button[mat-raised-button] mat-icon,
+button[mat-flat-button] mat-icon,
+button[mat-stroked-button] mat-icon,
+button[mat-button] mat-icon {
+  margin-right: 6px;
+}
+
+/* Keep icon-only buttons nice and circular */
+button[mat-icon-button],
+.mat-mdc-icon-button {
+  border-radius: 50% !important;
+  width: 42px;
+  height: 42px;
+  padding: 0 !important;
+}
+
+
+/* ================= TOOLBAR FIX ================= */
+
+.main-toolbar,
+.main-toolbar * {
+  color: var(--toolbar-text) !important;
+}
+
+.main-toolbar a[mat-button],
+.main-toolbar button[mat-button],
+.main-toolbar .mat-mdc-button,
+.main-toolbar mat-icon {
+  color: var(--toolbar-text) !important;
+}
+
+.main-toolbar a[mat-button]:hover,
+.main-toolbar button[mat-button]:hover {
+  background: rgba(255, 255, 255, 0.16) !important;
+}
+
+.main-toolbar .active-link {
+  background: rgba(255, 255, 255, 0.22) !important;
+  color: var(--toolbar-text) !important;
+}
+
+.main-toolbar .theme-toggle-btn {
+  color: var(--toolbar-text) !important;
 }

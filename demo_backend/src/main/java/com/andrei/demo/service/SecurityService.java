@@ -20,11 +20,11 @@ public class SecurityService {
 
     public LoginResponse login(String email, String password) {
         if (email == null || email.isBlank()) {
-            return new LoginResponse(false, null, null, "Email is required");
+            return new LoginResponse(false, null, null, null, "Email is required");
         }
 
         if (password == null || password.isBlank()) {
-            return new LoginResponse(false, null, null, "Password is required");
+            return new LoginResponse(false, null, null, null, "Password is required");
         }
 
         Optional<Person> maybePerson = personRepository.findByEmail(email);
@@ -32,6 +32,7 @@ public class SecurityService {
         if (maybePerson.isEmpty()) {
             return new LoginResponse(
                     false,
+                    null,
                     null,
                     null,
                     "Person with email " + email + " not found"
@@ -47,15 +48,11 @@ public class SecurityService {
                     true,
                     person.getRole().name(),
                     token,
+                    person.getId(),
                     null
             );
         }
 
-        return new LoginResponse(
-                false,
-                null,
-                null,
-                "Incorrect password"
-        );
+        return new LoginResponse(false, null, null, null, "Wrong email or password");
     }
 }

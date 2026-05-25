@@ -15,12 +15,25 @@
     @if (role() === 'ORGANIZER') {
       <a mat-button routerLink="/feed">Events</a>
       <a mat-button routerLink="/organizer/my-events">My Events</a>
-      <a mat-button routerLink="/organizer/create-event">Create Event</a>
+      <a mat-button routerLink="/organizer/reservations" routerLinkActive="active-link">
+        Reservations
+      </a>
     }
 
     <a mat-button routerLink="/profile">My Profile</a>
 
     <span class="toolbar-spacer"></span>
+
+    <button
+      mat-button
+      type="button"
+      class="theme-toggle-btn"
+      (click)="toggleTheme()"
+      [attr.aria-label]="themeLabel()"
+      [title]="themeLabel()"
+    >
+      <span class="theme-emoji">{{ themeIcon() }}</span>
+    </button>
 
     <button mat-button type="button" (click)="logout()">
       <mat-icon>logout</mat-icon>
@@ -29,4 +42,6 @@
   }
 </mat-toolbar>
 
-<router-outlet></router-outlet>
+<main class="content">
+  <router-outlet></router-outlet>
+</main>

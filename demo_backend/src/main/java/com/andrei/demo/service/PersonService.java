@@ -77,9 +77,11 @@ public class PersonService {
 
         if (dto.getEmail() != null) {
             Optional<Person> personWithSameEmail = personRepository.findByEmail(dto.getEmail());
+
             if (personWithSameEmail.isPresent() && !personWithSameEmail.get().getId().equals(uuid)) {
                 throw new FieldValidationException("email", "Email must be unique. This email is already used");
             }
+
             existingPerson.setEmail(dto.getEmail());
         }
 
@@ -87,8 +89,17 @@ public class PersonService {
             existingPerson.setAge(dto.getAge());
         }
 
+        if (dto.getPassword() != null) {
+            String hashedPassword = passwordUtil.hashPassword(dto.getPassword());
+            existingPerson.setPassword(hashedPassword);
+        }
+
         if (dto.getRole() != null) {
             existingPerson.setRole(dto.getRole());
+        }
+
+        if (dto.getRequestedRole() != null) {
+            existingPerson.setRequestedRole(dto.getRequestedRole());
         }
 
         return personRepository.save(existingPerson);
@@ -117,6 +128,31 @@ public class PersonService {
                 .orElseThrow(() -> new ValidationException("Person with id " + uuid + " not found"));
 
         person.setRole(PersonRole.ADMIN);
+        return personRepository.save(person);
+    }
+
+    public Person acceptRoleRequest(UUID uuid) {
+        Person person = getPersonById(uuid);
+
+        if (person.getRequestedRole() == null) {
+            throw new ValidationException("This user does not have a role request.");
+        }
+
+        person.setRole(person.getRequestedRole());
+        person.setRequestedRole(null);
+
+        return personRepository.save(person);
+    }
+
+    public Person declineRoleRequest(UUID uuid) {
+        Person person = getPersonById(uuid);
+
+        if (person.getRequestedRole() == null) {
+            throw new ValidationException("This user does not have a role request.");
+        }
+
+        person.setRequestedRole(null);
+
         return personRepository.save(person);
     }
 }

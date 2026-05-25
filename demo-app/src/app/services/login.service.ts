@@ -12,8 +12,9 @@ export interface LoginRequest {
 export interface LoginResponse {
   success: boolean;
   role: string | null;
-  errorMessage: string | null;
   token: string | null;
+  personId: string | null;
+  errorMessage: string | null;
 }
 
 @Injectable({ providedIn: 'root' })

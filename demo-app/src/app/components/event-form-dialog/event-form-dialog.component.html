@@ -50,17 +50,19 @@
       }
     </mat-form-field>
 
-    <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Organizer</mat-label>
-      <mat-select formControlName="organizerId">
-        @for (organizer of data.organizers; track organizer.id) {
-          <mat-option [value]="organizer.id">{{ organizer.name }} ({{ organizer.email }})</mat-option>
-        }
-      </mat-select>
-      @if (form.controls.organizerId.hasError('required')) {
-        <mat-error>Organizer is required.</mat-error>
-      }
-    </mat-form-field>
+    @if (showOrganizerField) {
+      <mat-form-field appearance="outline">
+        <mat-label>Organizer</mat-label>
+
+        <mat-select formControlName="organizerId">
+          @for (organizer of data.organizers; track organizer.id) {
+            <mat-option [value]="organizer.id">
+              {{ organizer.name }} ({{ organizer.email }})
+            </mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+    }
   </form>
 </mat-dialog-content>
 

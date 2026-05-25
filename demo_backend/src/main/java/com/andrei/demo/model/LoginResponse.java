@@ -4,6 +4,6 @@ public record LoginResponse(
         Boolean success,
         String role,
         String token,
-        String errorMessage
+        java.util.UUID id, String personId
 ) {
 }

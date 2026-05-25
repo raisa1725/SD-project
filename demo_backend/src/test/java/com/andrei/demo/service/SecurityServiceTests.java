@@ -44,55 +44,50 @@ class SecurityServiceTests {
         closeable.close();
     }
 
-
     @Test
     void testLoginSuccess() {
-        String email = "john@example.com";
-        String password = "password";
-        String token = "token-123";
+        String email = "john.doe@example.com";
+        String password = "Password_john123!@#";
+
         Person person = new Person();
+        person.setName("John Doe");
         person.setEmail(email);
         person.setPassword("hashed-password");
-        person.setName("John Doe");
-        person.setEmail("john.doe@example.com");
-        person.setPassword("hashed-password");String token = "token-123";
         person.setAge(30);
         person.setRole(PersonRole.USER);
 
-        when(personRepository.findByEmail("john.doe@example.com"))
-                .thenReturn(Optional.of(person));
+        when(personRepository.findByEmail(email)).thenReturn(Optional.of(person));
         when(passwordUtil.checkPassword(password, person.getPassword())).thenReturn(true);
-        when(jwtUtil.createToken(person)).thenReturn(token);
 
-        LoginResponse response = securityService.login(
-                "john.doe@example.com",
-                "Password_john123!@#"
-        );
+        LoginResponse result = securityService.login(email, password);
 
-        assertTrue(response.success());
-        assertEquals("USER", response.role());
-        assertNull(response.errorMessage());
-        assertEquals(token, result.token());
+        assertTrue(result.success());
+        assertEquals("USER", result.role());
+        assertNull(result.errorMessage());
 
-        verify(personRepository).findByEmail("john.doe@example.com");
+        verify(personRepository, times(1)).findByEmail(email);
         verify(passwordUtil, times(1)).checkPassword(password, person.getPassword());
-        verify(jwtUtil, times(1)).createToken(person);
     }
 
     @Test
     void testLoginIncorrectPassword() {
         String email = "john@example.com";
         String password = "password";
+
         Person person = new Person();
         person.setEmail(email);
         person.setPassword("stored-hash");
+        person.setRole(PersonRole.USER);
 
         when(personRepository.findByEmail(email)).thenReturn(Optional.of(person));
         when(passwordUtil.checkPassword(password, person.getPassword())).thenReturn(false);
+
         LoginResponse result = securityService.login(email, password);
 
         assertFalse(result.success());
+        assertNull(result.role());
         assertEquals("Incorrect password", result.errorMessage());
+
         verify(personRepository, times(1)).findByEmail(email);
         verify(passwordUtil, times(1)).checkPassword(password, person.getPassword());
         verify(jwtUtil, never()).createToken(any(Person.class));
@@ -104,11 +99,87 @@ class SecurityServiceTests {
         String password = "password";
 
         when(personRepository.findByEmail(email)).thenReturn(Optional.empty());
+
         LoginResponse result = securityService.login(email, password);
 
         assertFalse(result.success());
+        assertNull(result.role());
         assertEquals("Person with email " + email + " not found", result.errorMessage());
+
         verify(personRepository, times(1)).findByEmail(email);
-        verifyNoInteractions(passwordUtil, jwtUtil);
+        verifyNoInteractions(passwordUtil);
+        verifyNoInteractions(jwtUtil);
+    }
+
+    @Test
+    void testLoginSuccessCreatesToken() {
+        String email = "john@example.com";
+        String rawPassword = "Password_john123!";
+        String hashedPassword = "hashed-password";
+        String token = "token-123";
+
+        Person person = new Person();
+        person.setName("John Doe");
+        person.setEmail(email);
+        person.setPassword(hashedPassword);
+        person.setAge(30);
+        person.setRole(PersonRole.USER);
+
+        when(personRepository.findByEmail(email)).thenReturn(Optional.of(person));
+        when(passwordUtil.checkPassword(rawPassword, hashedPassword)).thenReturn(true);
+        when(jwtUtil.createToken(person)).thenReturn(token);
+
+        LoginResponse result = securityService.login(email, rawPassword);
+
+        assertTrue(result.success());
+        assertEquals("USER", result.role());
+        assertNull(result.errorMessage());
+
+        verify(personRepository).findByEmail(email);
+        verify(passwordUtil).checkPassword(rawPassword, hashedPassword);
+        verify(jwtUtil).createToken(person);
+    }
+
+    @Test
+    void testLoginWrongPasswordDoesNotCreateToken() {
+        String email = "john@example.com";
+        String rawPassword = "Wrong_password123!";
+        String hashedPassword = "hashed-password";
+
+        Person person = new Person();
+        person.setEmail(email);
+        person.setPassword(hashedPassword);
+        person.setRole(PersonRole.USER);
+
+        when(personRepository.findByEmail(email)).thenReturn(Optional.of(person));
+        when(passwordUtil.checkPassword(rawPassword, hashedPassword)).thenReturn(false);
+
+        LoginResponse result = securityService.login(email, rawPassword);
+
+        assertFalse(result.success());
+        assertNull(result.role());
+        assertEquals("Incorrect password", result.errorMessage());
+
+        verify(personRepository).findByEmail(email);
+        verify(passwordUtil).checkPassword(rawPassword, hashedPassword);
+        verify(jwtUtil, never()).createToken(any(Person.class));
+    }
+
+    @Test
+    void testLoginEmailNotFoundDoesNotCheckPasswordOrCreateToken() {
+        String email = "missing@example.com";
+        String password = "Password_missing123!";
+
+        when(personRepository.findByEmail(email)).thenReturn(Optional.empty());
+
+        LoginResponse result = securityService.login(email, password);
+
+        assertFalse(result.success());
+        assertNull(result.role());
+        assertEquals("Person with email " + email + " not found", result.errorMessage());
+
+        verify(personRepository).findByEmail(email);
+        verifyNoInteractions(passwordUtil);
+        verifyNoInteractions(jwtUtil);
     }
 }

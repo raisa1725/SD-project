@@ -96,6 +96,21 @@ export const routes: Routes = [
         (m) => m.NotFoundPageComponent,
       ),
   },
+
+  {
+    path: 'organizer/my-events',
+    loadComponent: () =>
+      import('./features/organizer-my-events/organizer-my-events-page.component')
+        .then((m) => m.OrganizerMyEventsPageComponent),
+  },
+
+  {
+    path: 'organizer/reservations',
+    loadComponent: () =>
+      import('./features/organizer-reservations/organizer-reservations-page.component')
+        .then((m) => m.OrganizerReservationsPageComponent),
+  },
+
   {
     path: '**',
     redirectTo: 'error',

@@ -1,16 +1,23 @@
 :host {
   display: block;
+  color: var(--app-text);
+}
+
+h2[mat-dialog-title] {
+  color: var(--app-text);
+  font-weight: 700;
 }
 
 .dialog-content {
   min-width: 420px;
   max-width: 560px;
+  color: var(--app-text);
 }
 
 .description {
   margin: 0 0 20px;
   line-height: 1.5;
-  color: #555;
+  color: var(--app-muted-text);
 }
 
 .details-grid {
@@ -22,20 +29,35 @@
 .detail-card {
   padding: 14px;
   border-radius: 14px;
-  border: 1px solid #e5e5e5;
-  background: #fafafa;
+  border: 1px solid var(--app-border);
+  background: var(--app-surface-soft);
+  color: var(--app-text);
 }
 
 .label {
   display: block;
   margin-bottom: 4px;
   font-size: 0.8rem;
-  color: #777;
+  color: var(--app-muted-text);
 }
 
 .detail-card strong {
-  color: #222;
+  color: var(--app-text);
   font-size: 0.95rem;
+}
+
+mat-dialog-actions {
+  border-top: 1px solid var(--app-border);
+  padding-top: 12px;
+}
+
+button[mat-button] {
+  color: var(--app-text);
+}
+
+button[mat-raised-button] {
+  background: var(--primary-btn-bg);
+  color: var(--primary-btn-text);
 }
 
 @media (max-width: 600px) {

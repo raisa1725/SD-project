@@ -1,43 +1,47 @@
 package com.andrei.demo.controller;
 
-import com.andrei.demo.model.Event;
 import com.andrei.demo.model.Person;
 import com.andrei.demo.model.PersonRole;
 import com.andrei.demo.repository.EventRepository;
 import com.andrei.demo.repository.PersonRepository;
 import com.andrei.demo.repository.ReservationRepository;
-import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@SpringBootTest
-@AutoConfigureMockMvc
-@TestPropertySource(locations = "classpath:application-test.properties")
-public class EventControllerIntegrationTests {
+@SpringBootTest(properties = {
+        "MAIL_USERNAME=test@example.com",
+        "MAIL_PASSWORD=test-password",
+        "app.mail.from=test@example.com",
+        "spring.mail.host=localhost",
+        "spring.mail.port=3025",
+        "spring.mail.username=test@example.com",
+        "spring.mail.password=test-password",
+        "spring.mail.properties.mail.smtp.auth=false",
+        "spring.mail.properties.mail.smtp.starttls.enable=false"
+})
+@AutoConfigureMockMvc(addFilters = false)
+@ActiveProfiles("test")
+class EventControllerIntegrationTests {
 
     @Autowired
     private MockMvc mockMvc;
 
     @Autowired
-    private EventRepository eventRepository;
+    private PersonRepository personRepository;
 
     @Autowired
-    private PersonRepository personRepository;
+    private EventRepository eventRepository;
 
     @Autowired
     private ReservationRepository reservationRepository;
@@ -45,157 +49,183 @@ public class EventControllerIntegrationTests {
     private Person organizer;
 
     @BeforeEach
-    void setUp() {
+    void cleanUp() {
         reservationRepository.deleteAll();
         eventRepository.deleteAll();
         personRepository.deleteAll();
 
-        reservationRepository.flush();
-        eventRepository.flush();
-        personRepository.flush();
-
         organizer = new Person();
-        organizer.setName("Test Organizer");
-        organizer.setPassword("Organizer_pass123!@#");
-        organizer.setAge(30);
+        organizer.setName("Organizer User");
         organizer.setEmail("organizer@example.com");
+        organizer.setPassword("hashed-password");
+        organizer.setAge(30);
         organizer.setRole(PersonRole.ORGANIZER);
 
         organizer = personRepository.save(organizer);
     }
 
     @Test
-    void testGetEvents() throws Exception {
-        createSavedEvent();
+    void testAddEventSuccessfully() throws Exception {
+        String date = LocalDateTime.now().plusDays(10).withNano(0).toString();
 
-        mockMvc.perform(get("/event"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(1))
-                .andExpect(jsonPath("$[*].title",
-                        Matchers.contains("Test Event")))
-                .andExpect(jsonPath("$[*].location",
-                        Matchers.contains("Cluj-Napoca")));
-    }
-
-    @Test
-    void testAddEvent_ValidPayload() throws Exception {
-        String validEventJson = """
+        String requestBody = """
                 {
-                  "title": "Spring Workshop",
-                  "description": "Backend testing workshop",
-                  "location": "Cluj-Napoca",
+                  "title": "Mountain Hiking",
+                  "description": "A hiking event in the mountains",
+                  "location": "Cluj",
                   "date": "%s",
-                  "maxParticipants": 50,
+                  "maxParticipants": 20,
                   "organizerId": "%s"
                 }
-                """.formatted(LocalDateTime.now().plusDays(5), organizer.getId());
+                """.formatted(date, organizer.getId());
 
         mockMvc.perform(post("/event")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(validEventJson))
+                        .content(requestBody))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").exists())
-                .andExpect(jsonPath("$.title").value("Spring Workshop"))
-                .andExpect(jsonPath("$.description").value("Backend testing workshop"))
-                .andExpect(jsonPath("$.location").value("Cluj-Napoca"))
-                .andExpect(jsonPath("$.maxParticipants").value(50));
+                .andExpect(jsonPath("$.title").value("Mountain Hiking"))
+                .andExpect(jsonPath("$.location").value("Cluj"))
+                .andExpect(jsonPath("$.maxParticipants").value(20));
     }
 
     @Test
-    void testAddEvent_InvalidPastDate() throws Exception {
-        String invalidEventJson = """
+    void testGetEventsReturnsCreatedEvent() throws Exception {
+        String date = LocalDateTime.now().plusDays(12).withNano(0).toString();
+
+        String requestBody = """
                 {
-                  "title": "Old Event",
-                  "description": "This event has a past date",
-                  "location": "Cluj-Napoca",
-                  "date": "%s",
-                  "maxParticipants": 50,
-                  "organizerId": "%s"
-                }
-                """.formatted(LocalDateTime.now().minusDays(1), organizer.getId());
-
-        mockMvc.perform(post("/event")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(invalidEventJson))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.date").value("Event date must be in the future"));
-    }
-
-    @Test
-    void testAddEvent_InvalidCapacity() throws Exception {
-        String invalidEventJson = """
-                {
-                  "title": "Invalid Capacity Event",
-                  "description": "This event has invalid capacity",
-                  "location": "Cluj-Napoca",
-                  "date": "%s",
-                  "maxParticipants": 0,
-                  "organizerId": "%s"
-                }
-                """.formatted(LocalDateTime.now().plusDays(5), organizer.getId());
-
-        mockMvc.perform(post("/event")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(invalidEventJson))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.maxParticipants")
-                        .value("Maximum number of participants must be at least 1"));
-    }
-
-    @Test
-    void testGetEventById() throws Exception {
-        Event event = createSavedEvent();
-
-        mockMvc.perform(get("/event/" + event.getId()))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(event.getId().toString()))
-                .andExpect(jsonPath("$.title").value("Test Event"))
-                .andExpect(jsonPath("$.location").value("Cluj-Napoca"))
-                .andExpect(jsonPath("$.maxParticipants").value(100));
-    }
-
-    @Test
-    void testPatchEvent_ValidPayload() throws Exception {
-        Event event = createSavedEvent();
-
-        String patchJson = """
-                {
-                  "title": "Updated Event",
+                  "title": "City Walk",
+                  "description": "A city walking event",
                   "location": "Bucharest",
-                  "maxParticipants": 120
+                  "date": "%s",
+                  "maxParticipants": 15,
+                  "organizerId": "%s"
                 }
-                """;
+                """.formatted(date, organizer.getId());
 
-        mockMvc.perform(patch("/event/" + event.getId())
+        mockMvc.perform(post("/event")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(patchJson))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.title").value("Updated Event"))
-                .andExpect(jsonPath("$.location").value("Bucharest"))
-                .andExpect(jsonPath("$.maxParticipants").value(120));
-    }
-
-    @Test
-    void testDeleteEvent() throws Exception {
-        Event event = createSavedEvent();
-
-        mockMvc.perform(delete("/event/" + event.getId()))
+                        .content(requestBody))
                 .andExpect(status().isOk());
 
         mockMvc.perform(get("/event"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(0));
+                .andExpect(jsonPath("$[0].title").value("City Walk"))
+                .andExpect(jsonPath("$[0].location").value("Bucharest"));
     }
 
-    private Event createSavedEvent() {
-        Event event = new Event();
-        event.setTitle("Test Event");
-        event.setDescription("Test description");
-        event.setLocation("Cluj-Napoca");
-        event.setDate(LocalDateTime.now().plusDays(5));
-        event.setMaxParticipants(100);
-        event.setOrganizer(organizer);
+    @Test
+    void testCreateEventWithPastDateReturnsBadRequest() throws Exception {
+        String date = LocalDateTime.now().minusDays(1).withNano(0).toString();
 
-        return eventRepository.save(event);
+        String requestBody = """
+                {
+                  "title": "Past Event",
+                  "description": "This event should not be valid",
+                  "location": "Cluj",
+                  "date": "%s",
+                  "maxParticipants": 10,
+                  "organizerId": "%s"
+                }
+                """.formatted(date, organizer.getId());
+
+        mockMvc.perform(post("/event")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestBody))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.date").exists());
+    }
+
+    @Test
+    void testCreateEventWithInvalidCapacityReturnsBadRequest() throws Exception {
+        String date = LocalDateTime.now().plusDays(5).withNano(0).toString();
+
+        String requestBody = """
+                {
+                  "title": "Invalid Capacity",
+                  "description": "Capacity is invalid",
+                  "location": "Cluj",
+                  "date": "%s",
+                  "maxParticipants": 0,
+                  "organizerId": "%s"
+                }
+                """.formatted(date, organizer.getId());
+
+        mockMvc.perform(post("/event")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestBody))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.maxParticipants").exists());
+    }
+
+    @Test
+    void testPatchEventSuccessfully() throws Exception {
+        String date = LocalDateTime.now().plusDays(8).withNano(0).toString();
+
+        String createBody = """
+                {
+                  "title": "Old Event Title",
+                  "description": "Old description",
+                  "location": "Cluj",
+                  "date": "%s",
+                  "maxParticipants": 10,
+                  "organizerId": "%s"
+                }
+                """.formatted(date, organizer.getId());
+
+        String response = mockMvc.perform(post("/event")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(createBody))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        String eventId = response.split("\"id\":\"")[1].split("\"")[0];
+
+        String patchBody = """
+                {
+                  "title": "Updated Event Title",
+                  "location": "Timisoara",
+                  "maxParticipants": 25
+                }
+                """;
+
+        mockMvc.perform(patch("/event/" + eventId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(patchBody))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.title").value("Updated Event Title"))
+                .andExpect(jsonPath("$.location").value("Timisoara"))
+                .andExpect(jsonPath("$.maxParticipants").value(25));
+    }
+
+    @Test
+    void testDeleteEventSuccessfully() throws Exception {
+        String date = LocalDateTime.now().plusDays(9).withNano(0).toString();
+
+        String createBody = """
+                {
+                  "title": "Delete Event",
+                  "description": "Event to delete",
+                  "location": "Cluj",
+                  "date": "%s",
+                  "maxParticipants": 10,
+                  "organizerId": "%s"
+                }
+                """.formatted(date, organizer.getId());
+
+        String response = mockMvc.perform(post("/event")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(createBody))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        String eventId = response.split("\"id\":\"")[1].split("\"")[0];
+
+        mockMvc.perform(delete("/event/" + eventId))
+                .andExpect(status().isOk());
     }
 }

@@ -1,0 +1,89 @@
+<main class="content">
+  <header class="page-header">
+    <div>
+      <h1 class="page-title">My Events</h1>
+      <p class="page-subtitle">
+        Manage the events created by your organizer account.
+      </p>
+    </div>
+
+    <div class="header-actions">
+      <button
+        mat-flat-button
+        type="button"
+        (click)="openCreateDialog()"
+        [disabled]="isLoading() || !organizer()"
+      >
+        <mat-icon>add</mat-icon>
+        Create Event
+      </button>
+    </div>
+  </header>
+
+  <section class="view-actions">
+    <button mat-button type="button" (click)="viewMode.set('grid')">
+      <mat-icon>grid_view</mat-icon>
+      Grid
+    </button>
+
+    <button mat-button type="button" (click)="viewMode.set('list')">
+      <mat-icon>view_list</mat-icon>
+      List
+    </button>
+  </section>
+
+  @if (isLoading()) {
+    <p class="loading-status">
+      Loading your events...
+    </p>
+  }
+
+  @if (hasError()) {
+    <div class="error-alert">
+      <mat-icon>error_outline</mat-icon>
+      Could not load events. Please try again.
+    </div>
+  }
+
+  <section
+    [class.events-grid]="viewMode() === 'grid'"
+    [class.events-list]="viewMode() === 'list'"
+  >
+    @for (event of myEvents(); track event.id) {
+      <article class="event-card" (click)="openDetails(event)">
+        <div class="event-info">
+          <h2>{{ event.title }}</h2>
+          <p>{{ event.location }}</p>
+          <p>{{ event.date | date: 'dd/MM/yyyy HH:mm' }}</p>
+          <p>{{ event.maxParticipants }} seats</p>
+        </div>
+
+        <div class="card-actions" (click)="$event.stopPropagation()">
+          <button
+            mat-icon-button
+            type="button"
+            class="edit-btn"
+            aria-label="Edit event"
+            (click)="openEditDialog(event)"
+          >
+            <mat-icon>edit</mat-icon>
+          </button>
+
+          <button
+            mat-icon-button
+            type="button"
+            class="delete-btn"
+            aria-label="Delete event"
+            (click)="openDeleteDialog(event)"
+          >
+            <mat-icon>delete</mat-icon>
+          </button>
+        </div>
+      </article>
+    } @empty {
+      <p class="no-data-cell">
+        You have not created any events yet.
+      </p>
+    }
+  </section>
+</main>

@@ -8,6 +8,9 @@ import com.andrei.demo.model.Person;
 import com.andrei.demo.model.PersonRole;
 import com.andrei.demo.repository.EventRepository;
 import com.andrei.demo.repository.PersonRepository;
+import com.andrei.demo.repository.ReservationRepository;
+import org.springframework.transaction.annotation.Transactional;
+import com.andrei.demo.config.ValidationException;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
@@ -20,9 +23,9 @@ import java.util.UUID;
 @Service
 @AllArgsConstructor
 public class EventService {
-
     private final EventRepository eventRepository;
     private final PersonRepository personRepository;
+    private final ReservationRepository reservationRepository;
 
     public List<Event> getEvents() {
         return eventRepository.findAll();
@@ -109,10 +112,13 @@ public class EventService {
         return eventRepository.save(existingEvent);
     }
 
-    public void deleteEvent(UUID uuid) throws ValidationException {
+    @Transactional
+    public void deleteEvent(UUID uuid) {
         if (!eventRepository.existsById(uuid)) {
-            throw new ValidationException("Event with id " + uuid + " not found");
+            throw new ValidationException("Event not found.");
         }
+
+        reservationRepository.deleteByEvent_Id(uuid);
         eventRepository.deleteById(uuid);
     }
 

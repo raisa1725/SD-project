@@ -1,0 +1,70 @@
+:host {
+  display: block;
+  color: var(--app-text);
+}
+
+mat-dialog-content {
+  padding-top: 16px !important;
+  overflow: visible !important;
+  color: var(--app-text);
+}
+
+.simple-reservation-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  min-width: 360px;
+  padding: 8px 4px 18px;
+  text-align: center;
+  color: var(--app-text);
+}
+
+.event-label,
+.spots-label,
+.spots-helper {
+  margin: 0;
+  font-size: 13px;
+  color: var(--app-muted-text);
+}
+
+.event-name {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--app-text);
+}
+
+.spots-control {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 22px;
+  margin-top: 4px;
+}
+
+.spots-value {
+  min-width: 44px;
+  font-size: 28px;
+  font-weight: 700;
+  text-align: center;
+  color: var(--app-text);
+}
+
+mat-dialog-actions {
+  padding-top: 12px;
+  border-top: 1px solid var(--app-border);
+}
+
+button[mat-icon-button] {
+  color: var(--app-text);
+}
+
+button[mat-button] {
+  color: var(--app-text);
+}
+
+button[mat-raised-button] {
+  background: var(--primary-btn-bg);
+  color: var(--primary-btn-text);
+}

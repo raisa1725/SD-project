@@ -146,4 +146,28 @@ export class PersonListStore {
         error: (err: HttpErrorResponse) => this.handleError(err),
       });
   }
+
+  acceptRoleRequest(id: string): void {
+    this.personService
+      .acceptRoleRequest(id)
+      .subscribe((updatedPerson) => {
+        this.persons.update((persons) =>
+          persons.map((person) =>
+            person.id === updatedPerson.id ? updatedPerson : person
+          )
+        );
+      });
+  }
+
+  declineRoleRequest(id: string): void {
+    this.personService
+      .declineRoleRequest(id)
+      .subscribe((updatedPerson) => {
+        this.persons.update((persons) =>
+          persons.map((person) =>
+            person.id === updatedPerson.id ? updatedPerson : person
+          )
+        );
+      });
+  }
 }
